@@ -17,6 +17,7 @@ import {
   resolveValidationPolicy,
   type ValidationVoteType,
 } from '@sorriso-sentinel/domain';
+import { loadValidationRateLimitFromEnv } from '@sorriso-sentinel/shared';
 import { randomUUID } from 'node:crypto';
 import type { SessionClaims } from '../../../infrastructure/auth/hmac-session-token.service';
 import {
@@ -70,10 +71,11 @@ export class CastValidationVoteHandler {
     reason?: string;
     session: SessionClaims;
   }): Promise<CastValidationVoteResponse> {
+    const validationRateLimit = loadValidationRateLimitFromEnv();
     const rateLimit = await this.rateLimiter.consume(
       `validation:${params.session.reputationId}`,
-      30,
-      3600,
+      validationRateLimit.limit,
+      validationRateLimit.windowSeconds,
     );
 
     if (!rateLimit.allowed) {

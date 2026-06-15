@@ -90,6 +90,9 @@ export const MESSAGES_EN: Record<string, string> = {
   'endpoint.occurrences-get.summary': 'Get occurrence detail',
   'endpoint.occurrences-get.description':
     'Returns a single occurrence with privacy-aware location and author fields. Sensitive rows may be hidden by RLS.',
+  'endpoint.occurrences-list-comments.summary': 'List comments',
+  'endpoint.occurrences-list-comments.description':
+    'Returns community comments for an occurrence. Pseudonym is visible only to the comment author.',
   'endpoint.occurrences-comment.summary': 'Add comment',
   'endpoint.occurrences-comment.description':
     'Adds a community comment. Does not change occurrence confidence (INV-V4).',

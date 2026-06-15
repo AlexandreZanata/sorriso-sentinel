@@ -90,6 +90,9 @@ export const MESSAGES_PT: Record<string, string> = {
   'endpoint.occurrences-get.summary': 'Obter detalhe da ocorrência',
   'endpoint.occurrences-get.description':
     'Retorna uma ocorrência com localização e autor conforme privacidade. Linhas sensíveis podem ser ocultadas por RLS.',
+  'endpoint.occurrences-list-comments.summary': 'Listar comentários',
+  'endpoint.occurrences-list-comments.description':
+    'Retorna comentários da ocorrência. Pseudônimo visível apenas ao autor do comentário.',
   'endpoint.occurrences-comment.summary': 'Adicionar comentário',
   'endpoint.occurrences-comment.description':
     'Adiciona um comentário da comunidade. Não altera a confiança da ocorrência (INV-V4).',

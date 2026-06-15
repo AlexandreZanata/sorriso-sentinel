@@ -3,6 +3,7 @@ import {
   occurrenceComments,
   withCityContext,
 } from '@sorriso-sentinel/database';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import type pg from 'pg';
 import { DATABASE_POOL } from './database.tokens';
 
@@ -19,9 +20,35 @@ export interface StoredComment {
 
 export interface OccurrenceCommentStorePort {
   save(comment: StoredComment): Promise<void>;
+  listByOccurrence(
+    occurrenceId: string,
+    cityId: string,
+  ): Promise<StoredComment[]>;
 }
 
 export const OCCURRENCE_COMMENT_STORE = Symbol('OCCURRENCE_COMMENT_STORE');
+
+@Injectable()
+export class InMemoryOccurrenceCommentStore implements OccurrenceCommentStorePort {
+  private readonly comments: StoredComment[] = [];
+
+  async save(comment: StoredComment): Promise<void> {
+    this.comments.push({ ...comment });
+  }
+
+  async listByOccurrence(
+    occurrenceId: string,
+    cityId: string,
+  ): Promise<StoredComment[]> {
+    return this.comments
+      .filter(
+        (comment) =>
+          comment.occurrenceId === occurrenceId && comment.cityId === cityId,
+      )
+      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
+      .map((comment) => ({ ...comment }));
+  }
+}
 
 @Injectable()
 export class DrizzleOccurrenceCommentStore implements OccurrenceCommentStorePort {
@@ -42,6 +69,35 @@ export class DrizzleOccurrenceCommentStore implements OccurrenceCommentStorePort
         authorDisplayPolicy: comment.authorDisplayPolicy,
         createdAt: comment.createdAt,
       });
+    });
+  }
+
+  async listByOccurrence(
+    occurrenceId: string,
+    cityId: string,
+  ): Promise<StoredComment[]> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const rows = await db
+        .select()
+        .from(occurrenceComments)
+        .where(
+          and(
+            eq(occurrenceComments.occurrenceId, occurrenceId),
+            isNull(occurrenceComments.deletedAt),
+          ),
+        )
+        .orderBy(asc(occurrenceComments.createdAt));
+
+      return rows.map((row) => ({
+        id: row.id,
+        occurrenceId: row.occurrenceId,
+        cityId: row.cityId,
+        authorReputationId: row.authorReputationId,
+        parentCommentId: row.parentCommentId ?? undefined,
+        text: row.text,
+        authorDisplayPolicy: row.authorDisplayPolicy,
+        createdAt: row.createdAt,
+      }));
     });
   }
 }

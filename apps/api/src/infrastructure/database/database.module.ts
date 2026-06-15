@@ -44,6 +44,7 @@ import { DATABASE_POOL } from './database.tokens';
 import { DrizzleContributorIdentityRepository } from './drizzle-contributor-identity.repository';
 import {
   DrizzleOccurrenceCommentStore,
+  InMemoryOccurrenceCommentStore,
   OCCURRENCE_COMMENT_STORE,
 } from './drizzle-occurrence-comment.store';
 import { DrizzleOccurrenceStore } from './drizzle-occurrence.store';
@@ -83,9 +84,7 @@ export class DatabaseModule {
           { provide: OCCURRENCE_STORE, useClass: InMemoryOccurrenceStore },
           {
             provide: OCCURRENCE_COMMENT_STORE,
-            useValue: {
-              save: async () => undefined,
-            },
+            useClass: InMemoryOccurrenceCommentStore,
           },
           {
             provide: OCCURRENCE_ID_GENERATOR,

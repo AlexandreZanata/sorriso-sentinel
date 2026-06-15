@@ -306,6 +306,16 @@ docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T 
   && pass "POST /comments persisted in Postgres" \
   || fail "POST /comments persisted in Postgres"
 
+expect_status "GET /occurrences/:id/comments (no session -> 401)" 401 \
+  "${api_url}/occurrences/${occurrence_id}/comments"
+
+expect_status "GET /occurrences/:id/comments (valid -> 200)" 200 \
+  "${api_url}/occurrences/${occurrence_id}/comments" \
+  -H "Authorization: Bearer ${token}"
+
+grep -q 'Confirmado via docker routes' /tmp/route-body.json && pass "GET /comments lists posted comment" \
+  || fail "GET /comments lists posted comment" "$(cat /tmp/route-body.json)"
+
 echo ""
 echo "--- Validation (confirm/deny) ---"
 voter_local_key_ref="${local_key_ref}-voter"
@@ -348,6 +358,62 @@ expect_status "POST /occurrences/:id/deny (self-validation -> 403)" 403 \
   -H "Authorization: Bearer ${token}" \
   -H 'Content-Type: application/json' \
   -d '{"version":2,"reason":"false_alarm"}'
+
+stale_voter_key_ref="${local_key_ref}-stale-voter"
+expect_status "POST /sessions/bootstrap (stale-version voter -> 201)" 201 \
+  -X POST "${api_url}/sessions/bootstrap" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"localKeyRef\":\"${stale_voter_key_ref}\"}"
+
+stale_voter_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['sessionToken'])")"
+
+expect_status "POST /occurrences/:id/confirm (stale version -> 409)" 409 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/confirm" \
+  -H "Authorization: Bearer ${stale_voter_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"version":1}'
+
+grep -q 'OCCURRENCE_VERSION_CONFLICT' /tmp/route-body.json && pass "POST /confirm stale version body" \
+  || fail "POST /confirm stale version body" "$(cat /tmp/route-body.json)"
+
+expect_status "POST /occurrences (consensus target -> 201)" 201 \
+  -X POST "${api_url}/occurrences" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"category":"pothole","latitude":-12.5428,"longitude":-55.7219}'
+
+consensus_occurrence_id="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['id'])")"
+consensus_version=1
+
+for voter_index in 1 2 3 4 5; do
+  voter_key_ref="${local_key_ref}-consensus-${voter_index}"
+  expect_status "POST /sessions/bootstrap (consensus voter ${voter_index} -> 201)" 201 \
+    -X POST "${api_url}/sessions/bootstrap" \
+    -H 'Content-Type: application/json' \
+    -d "{\"cityId\":\"${city_id}\",\"localKeyRef\":\"${voter_key_ref}\"}"
+
+  consensus_voter_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['sessionToken'])")"
+
+  expect_status "POST /occurrences/:id/confirm (consensus vote ${voter_index} -> 200)" 200 \
+    -X POST "${api_url}/occurrences/${consensus_occurrence_id}/confirm" \
+    -H "Authorization: Bearer ${consensus_voter_token}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"version\":${consensus_version},\"reason\":\"verified_locally\"}"
+
+  consensus_version="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['version'])")"
+done
+
+grep -q '"status":"active"' /tmp/route-body.json && pass "POST /confirm fifth vote promotes to active" \
+  || fail "POST /confirm fifth vote promotes to active" "$(cat /tmp/route-body.json)"
+grep -q '"confidenceLevel":100' /tmp/route-body.json && pass "POST /confirm fifth vote confidence 100" \
+  || fail "POST /confirm fifth vote confidence" "$(cat /tmp/route-body.json)"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT status FROM occurrences WHERE id = '${consensus_occurrence_id}';" \
+  | grep -q active \
+  && pass "POST /confirm consensus persisted active status" \
+  || fail "POST /confirm consensus persisted active status"
 
 echo ""
 echo "--- User accounts ---"

@@ -334,6 +334,49 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
       errors: [{ status: 404, code: 'OCCURRENCE_NOT_FOUND', description: 'Missing or cross-tenant' }],
     },
     {
+      id: 'occurrences-list-comments',
+      group: 'Occurrences',
+      method: 'GET',
+      path: '/occurrences/:id/comments',
+      summary: 'List comments',
+      description:
+        'Returns community comments for an occurrence in chronological order. Author pseudonym is shown only to the comment author.',
+      auth: 'session',
+      statusCodes: [
+        { status: 200, description: 'Comment list' },
+        { status: 401, description: 'Missing session' },
+        { status: 404, description: 'Occurrence not found in city' },
+      ],
+      headers: [
+        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <sessionToken>' },
+      ],
+      pathParams: [
+        { name: 'id', type: 'uuid', required: true, description: 'Occurrence id' },
+      ],
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          {
+            name: 'items',
+            type: 'array',
+            required: true,
+            description: 'Comments ordered by createdAt ascending',
+          },
+        ],
+        example: {
+          items: [
+            {
+              id: '01932f1a-0000-7000-8000-000000000088',
+              text: 'Confirmed via docker routes.',
+              createdAt: '2026-06-15T17:00:00.000Z',
+              author: { displayPolicy: 'pseudonym', pseudonym: 'RtUser1a2b' },
+            },
+          ],
+        },
+      },
+      errors: [{ status: 404, code: 'OCCURRENCE_NOT_FOUND', description: 'Unknown occurrence in tenant' }],
+    },
+    {
       id: 'occurrences-comment',
       group: 'Occurrences',
       method: 'POST',
