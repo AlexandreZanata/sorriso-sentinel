@@ -7,6 +7,7 @@ import type {
   OccurrenceStorePort,
   StoredOccurrence,
 } from '../../../infrastructure/occurrences/in-memory-occurrence.store';
+import type { AuditLogRepositoryPort } from '@sorriso-sentinel/domain';
 import type { RateLimiterPort } from '../../../infrastructure/redis/rate-limiter.port';
 import { CreateOccurrenceHandler } from './create-occurrence.handler';
 
@@ -24,6 +25,7 @@ describe('CreateOccurrenceHandler', () => {
   let rateLimiter: RateLimiterPort;
   let eventPublisher: OccurrenceEventPublisherPort;
   let occurrenceIds: OccurrenceIdGeneratorPort;
+  let auditLog: AuditLogRepositoryPort;
   let handler: CreateOccurrenceHandler;
 
   const validBody = {
@@ -38,6 +40,7 @@ describe('CreateOccurrenceHandler', () => {
       update: vi.fn().mockResolvedValue(undefined),
       findById: vi.fn().mockResolvedValue(null),
       listInBbox: vi.fn().mockResolvedValue({ items: [], nextCursor: null }),
+      countByStatus: vi.fn().mockResolvedValue(0),
     };
     rateLimiter = {
       consume: vi.fn().mockResolvedValue({ allowed: true }),
@@ -50,11 +53,21 @@ describe('CreateOccurrenceHandler', () => {
         .fn()
         .mockResolvedValue('01932f1a-0000-7000-8000-000000000099'),
     };
+    auditLog = {
+      append: vi.fn().mockResolvedValue(undefined),
+      getSummary: vi.fn().mockResolvedValue({
+        totalEntries: 0,
+        sensitiveEntries: 0,
+        lastRecordedAt: null,
+        actionCounts: {},
+      }),
+    };
     handler = new CreateOccurrenceHandler(
       occurrences,
       rateLimiter,
       eventPublisher,
       occurrenceIds,
+      auditLog,
     );
   });
 
@@ -84,6 +97,7 @@ describe('CreateOccurrenceHandler', () => {
 
     expect(occurrences.save).toHaveBeenCalledTimes(1);
     expect(eventPublisher.publish).toHaveBeenCalledTimes(1);
+    expect(auditLog.append).toHaveBeenCalledTimes(1);
   });
 
   it('should_map_sensitive_response_without_author', async () => {

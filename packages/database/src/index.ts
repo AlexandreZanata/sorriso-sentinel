@@ -3,4 +3,5 @@ export * from './schema/occurrences.js';
 export * from './schema/occurrence-comments.js';
 export * from './schema/domain-outbox.js';
 export * from './schema/media-assets.js';
+export * from './schema/occurrence-audit.js';
 export * from './client.js';

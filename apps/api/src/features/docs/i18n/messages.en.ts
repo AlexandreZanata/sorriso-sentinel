@@ -146,7 +146,10 @@ export const MESSAGES_EN: Record<string, string> = {
     'Soft-deletes account and anonymizes email. Returns 204 with empty body.',
   'endpoint.admin-audit-summary.summary': 'Admin audit summary',
   'endpoint.admin-audit-summary.description':
-    'Admin-only audit summary stub. Requires city_admin role in JWT claims.',
+    'Aggregated audit log metrics for the tenant. Requires security_audit or city_admin role.',
+  'endpoint.admin-moderation-queue.summary': 'Moderation queue summary',
+  'endpoint.admin-moderation-queue.description':
+    'Pending review counts for the tenant. Requires moderator or city_admin role.',
   'seedGroup.tenant': 'Tenant & identifiers',
   'seedGroup.session': 'Session bootstrap',
   'seedGroup.identity': 'Identity & crypto',
