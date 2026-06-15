@@ -19,6 +19,9 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "@sorriso-sentinel/geo": "*"
+  },
   "devDependencies": {
     "@types/node": "^22.15.21",
     "typescript": "^5.8.3",
