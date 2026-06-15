@@ -160,6 +160,7 @@ export class CreateOccurrenceHandler {
       isSensitive: occurrence.isSensitive,
       version: occurrence.version,
       createdAt: occurrence.createdAt,
+      updatedAt: occurrence.createdAt,
     };
   }
 

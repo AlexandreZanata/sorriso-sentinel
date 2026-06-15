@@ -35,6 +35,7 @@ describe('CreateOccurrenceHandler', () => {
   beforeEach(() => {
     occurrences = {
       save: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(undefined),
       findById: vi.fn().mockResolvedValue(null),
     };
     rateLimiter = {

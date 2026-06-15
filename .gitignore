@@ -61,19 +61,13 @@ Thumbs.db
 
 # IDE / editors
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
 .project
 .classpath
 .settings/
-
-# VS Code (keep shared workspace settings)
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
-!.vscode/tasks.json
 
 # Docker local overrides
 docker-compose.override.yml

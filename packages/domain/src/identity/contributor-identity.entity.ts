@@ -144,6 +144,16 @@ export class ContributorIdentity {
     this.props.updatedAt = params.clock();
   }
 
+  linkPublicProfile(publicProfileId: string, clock: () => Date): void {
+    if (!publicProfileId?.trim()) {
+      throw new Error('Public profile id is required');
+    }
+
+    this.props.publicProfileId = publicProfileId;
+    this.props.version += 1;
+    this.props.updatedAt = clock();
+  }
+
   toProps(): ContributorIdentityProps {
     return { ...this.props };
   }

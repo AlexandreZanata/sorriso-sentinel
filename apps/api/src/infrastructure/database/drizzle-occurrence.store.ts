@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { AuthorDisplayPolicy } from '@sorriso-sentinel/domain';
+import type { AuthorDisplayPolicy, OccurrenceStatus } from '@sorriso-sentinel/domain';
 import { occurrences, withCityContext } from '@sorriso-sentinel/database';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type pg from 'pg';
 import {
+  OccurrenceUpdateConflictError,
   type OccurrenceStorePort,
   type StoredOccurrence,
 } from '../occurrences/in-memory-occurrence.store';
@@ -34,8 +35,35 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         description: occurrence.description,
         version: occurrence.version,
         createdAt: occurrence.createdAt,
-        updatedAt: occurrence.createdAt,
+        updatedAt: occurrence.updatedAt,
       });
+    });
+  }
+
+  async update(
+    occurrence: StoredOccurrence,
+    expectedVersion: number,
+  ): Promise<void> {
+    await withCityContext(this.pool, occurrence.cityId, async (db) => {
+      const rows = await db
+        .update(occurrences)
+        .set({
+          status: occurrence.status,
+          confidenceLevel: occurrence.confidenceLevel,
+          version: occurrence.version,
+          updatedAt: occurrence.updatedAt,
+        })
+        .where(
+          and(
+            eq(occurrences.id, occurrence.id),
+            eq(occurrences.version, expectedVersion),
+          ),
+        )
+        .returning({ id: occurrences.id });
+
+      if (rows.length === 0) {
+        throw new OccurrenceUpdateConflictError();
+      }
     });
   }
 
@@ -60,8 +88,8 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         cityId: row.cityId,
         category: row.category,
         occurrenceKind: row.occurrenceKind,
-        status: row.status as 'unverified',
-        confidenceLevel: row.confidenceLevel as 0,
+        status: row.status as OccurrenceStatus,
+        confidenceLevel: row.confidenceLevel,
         latitude: row.latitude,
         longitude: row.longitude,
         privacyLevel: row.privacyLevel,
@@ -71,6 +99,7 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         isSensitive: row.isSensitive,
         version: row.version,
         createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
       };
     });
   }
