@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionGuard } from '../identity/session/session.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
 import type { SessionClaims } from '../../infrastructure/auth/hmac-session-token.service';
 import { GetMyAccountHandler } from './get-my-account/get-my-account.handler';
 import { RegisterUserAccountHandler } from './register-user-account/register-user-account.handler';
@@ -46,7 +47,7 @@ export class UserAccountsController {
   }
 
   @Get('me')
-  @UseGuards(SessionGuard)
+  @UseGuards(SessionGuard, TenantGuard)
   getMe(@Req() request: { session?: SessionClaims }) {
     return this.getMyAccountHandler.execute(request.session!);
   }

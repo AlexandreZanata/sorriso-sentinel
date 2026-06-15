@@ -17,6 +17,7 @@ export const registerUserAccountSchema = z
     deviceNonce: z.string().min(8).max(128),
     pqcPublicKeyRef: z.string().regex(/^[a-f0-9]{64}$/i),
     pqcSignature: z.string().min(1),
+    password: z.string().min(12).max(128),
     lgpdConsent: lgpdConsentSchema,
   })
   .strict();

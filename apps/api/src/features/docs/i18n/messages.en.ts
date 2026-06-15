@@ -64,14 +64,18 @@ export const MESSAGES_EN: Record<string, string> = {
     'Civic occurrence platform API. All tenant-scoped routes enforce city isolation via the session token. English-only field names.',
   'auth.note.0': 'Public routes do not require Authorization.',
   'auth.note.1': 'Session routes require: Authorization: Bearer <sessionToken>',
-  'auth.note.2': 'Obtain a session token via POST /sessions/bootstrap.',
-  'auth.note.3': 'Session tokens expire after 24 hours (HMAC-signed payload).',
+  'auth.note.2': 'Obtain a token via POST /sessions/bootstrap (HMAC, 24h) or POST /auth/login (JWT, 15 min).',
+  'auth.note.3': 'Refresh tokens rotate on POST /auth/refresh; revoke via POST /auth/logout.',
+  'auth.note.4': 'Header x-city-id must match token city_id when sent (403 CITY_MISMATCH).',
   'group.health': 'Health',
   'group.sessions': 'Sessions',
   'group.occurrences': 'Occurrences',
   'group.validation': 'Validation',
+  'group.media': 'Media',
   'group.identity': 'Identity',
+  'group.auth': 'Auth',
   'group.userAccounts': 'User accounts',
+  'group.admin': 'Admin',
   'endpoint.health.summary': 'Liveness probe',
   'endpoint.health.description': 'Returns ok when the process is running.',
   'endpoint.health-live.summary': 'Process liveness',
@@ -102,11 +106,29 @@ export const MESSAGES_EN: Record<string, string> = {
   'endpoint.occurrences-deny.summary': 'Deny occurrence',
   'endpoint.occurrences-deny.description':
     'Casts a denial vote. Self-validation on own reports is rejected (403).',
+  'endpoint.media-upload-slot.summary': 'Request media upload slot',
+  'endpoint.media-upload-slot.description':
+    'Issues presigned PUT URL for JPEG upload. Author-only; rate limited per reputationId.',
+  'endpoint.media-complete-upload.summary': 'Complete media upload',
+  'endpoint.media-complete-upload.description':
+    'Verifies upload in storage and runs inline EXIF stripping when MEDIA_PROCESS_INLINE=true.',
+  'endpoint.media-list.summary': 'List occurrence media',
+  'endpoint.media-list.description':
+    'Lists ready media with public URLs. Quarantine storage keys are never returned.',
   'endpoint.identity-mode.summary': 'Change identity mode',
   'endpoint.identity-mode.description': 'Switch contributor between ghost and pseudonym modes.',
   'endpoint.identity-rotate.summary': 'Rotate local key',
   'endpoint.identity-rotate.description':
     'Rotates device binding digest after local key change. Invalidates prior sessions.',
+  'endpoint.auth-login.summary': 'Login with email and password',
+  'endpoint.auth-login.description':
+    'Returns JWT access token (15 min) and revocable refresh token for verified active accounts.',
+  'endpoint.auth-refresh.summary': 'Refresh access token',
+  'endpoint.auth-refresh.description':
+    'Rotates refresh token and issues new JWT. Previous refresh token is revoked.',
+  'endpoint.auth-logout.summary': 'Logout',
+  'endpoint.auth-logout.description':
+    'Revokes refresh token family. Access token remains valid until natural expiry.',
   'endpoint.user-register.summary': 'Register user account',
   'endpoint.user-register.description':
     'Creates a pending account with email verification. Requires session + device proof.',
@@ -122,6 +144,9 @@ export const MESSAGES_EN: Record<string, string> = {
   'endpoint.user-me-delete.summary': 'Request LGPD erasure',
   'endpoint.user-me-delete.description':
     'Soft-deletes account and anonymizes email. Returns 204 with empty body.',
+  'endpoint.admin-audit-summary.summary': 'Admin audit summary',
+  'endpoint.admin-audit-summary.description':
+    'Admin-only audit summary stub. Requires city_admin role in JWT claims.',
   'seedGroup.tenant': 'Tenant & identifiers',
   'seedGroup.session': 'Session bootstrap',
   'seedGroup.identity': 'Identity & crypto',

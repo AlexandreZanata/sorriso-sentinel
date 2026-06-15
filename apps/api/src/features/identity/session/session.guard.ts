@@ -1,23 +1,27 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Inject } from '@nestjs/common';
+import {
+  ACCESS_TOKEN_ISSUER,
+  type AccessTokenIssuerPort,
+} from '../../../infrastructure/auth/jwt-access-token.service';
 import {
   SESSION_TOKEN_ISSUER,
   type SessionClaims,
   type SessionTokenIssuerPort,
 } from '../../../infrastructure/auth/hmac-session-token.service';
 
-export const SESSION_CLAIMS = Symbol('SESSION_CLAIMS');
-
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
     @Inject(SESSION_TOKEN_ISSUER)
     private readonly sessionTokens: SessionTokenIssuerPort,
+    @Inject(ACCESS_TOKEN_ISSUER)
+    private readonly accessTokens: AccessTokenIssuerPort,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -36,13 +40,28 @@ export class SessionGuard implements CanActivate {
     }
 
     const token = headerValue.slice('Bearer '.length);
-    const claims = this.sessionTokens.verify(token);
+    const jwtClaims = this.accessTokens.verify(token);
 
-    if (!claims) {
+    if (jwtClaims) {
+      request.session = {
+        contributorId: jwtClaims.contributorId,
+        cityId: jwtClaims.cityId,
+        reputationId: jwtClaims.reputationId,
+        identityMode: jwtClaims.identityMode,
+        pseudonym: jwtClaims.pseudonym,
+        userAccountId: jwtClaims.userAccountId,
+        roles: jwtClaims.roles,
+      };
+      return true;
+    }
+
+    const sessionClaims = this.sessionTokens.verify(token);
+
+    if (!sessionClaims) {
       throw new UnauthorizedException({ code: 'INVALID_SESSION' });
     }
 
-    request.session = claims;
+    request.session = sessionClaims;
     return true;
   }
 }

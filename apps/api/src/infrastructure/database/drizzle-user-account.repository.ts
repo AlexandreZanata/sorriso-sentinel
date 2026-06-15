@@ -7,6 +7,7 @@ import {
 } from '@sorriso-sentinel/domain';
 import {
   emailVerificationTokens,
+  userAccountRoles,
   userAccounts,
   withCityContext,
 } from '@sorriso-sentinel/database';
@@ -116,6 +117,77 @@ export class DrizzleUserAccountRepository implements UserAccountRepositoryPort {
         .limit(1);
 
       return rows[0] ? this.toProps(rows[0]) : null;
+    });
+  }
+
+  async setPasswordHash(
+    cityId: string,
+    userAccountId: string,
+    passwordHash: string,
+  ): Promise<void> {
+    await withCityContext(this.pool, cityId, async (db) => {
+      await db
+        .update(userAccounts)
+        .set({ passwordHash, updatedAt: new Date() })
+        .where(
+          and(
+            eq(userAccounts.id, userAccountId),
+            eq(userAccounts.cityId, cityId),
+          ),
+        );
+    });
+  }
+
+  async findPasswordHash(
+    cityId: string,
+    userAccountId: string,
+  ): Promise<string | null> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const rows = await db
+        .select({ passwordHash: userAccounts.passwordHash })
+        .from(userAccounts)
+        .where(
+          and(
+            eq(userAccounts.id, userAccountId),
+            eq(userAccounts.cityId, cityId),
+          ),
+        )
+        .limit(1);
+
+      return rows[0]?.passwordHash ?? null;
+    });
+  }
+
+  async listRoles(cityId: string, userAccountId: string): Promise<string[]> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const rows = await db
+        .select({ role: userAccountRoles.role })
+        .from(userAccountRoles)
+        .where(
+          and(
+            eq(userAccountRoles.cityId, cityId),
+            eq(userAccountRoles.userAccountId, userAccountId),
+          ),
+        );
+
+      return rows.map((row) => row.role);
+    });
+  }
+
+  async grantRole(
+    cityId: string,
+    userAccountId: string,
+    role: string,
+  ): Promise<void> {
+    await withCityContext(this.pool, cityId, async (db) => {
+      await db
+        .insert(userAccountRoles)
+        .values({
+          userAccountId,
+          cityId,
+          role,
+        })
+        .onConflictDoNothing();
     });
   }
 
@@ -247,6 +319,12 @@ export class DrizzleUserAccountRepository implements UserAccountRepositoryPort {
 export class InMemoryUserAccountRepository implements UserAccountRepositoryPort {
   private readonly accounts = new Map<string, UserAccountProps>();
   private readonly tokens = new Map<string, EmailVerificationTokenRecord>();
+  private readonly passwordHashes = new Map<string, string>();
+  private readonly roles = new Map<string, Set<string>>();
+
+  private roleKey(cityId: string, userAccountId: string): string {
+    return `${cityId}:${userAccountId}`;
+  }
 
   async save(account: UserAccountProps): Promise<void> {
     this.accounts.set(account.id, { ...account });
@@ -290,6 +368,36 @@ export class InMemoryUserAccountRepository implements UserAccountRepositoryPort 
     }
 
     return null;
+  }
+
+  async setPasswordHash(
+    cityId: string,
+    userAccountId: string,
+    passwordHash: string,
+  ): Promise<void> {
+    this.passwordHashes.set(this.roleKey(cityId, userAccountId), passwordHash);
+  }
+
+  async findPasswordHash(
+    cityId: string,
+    userAccountId: string,
+  ): Promise<string | null> {
+    return this.passwordHashes.get(this.roleKey(cityId, userAccountId)) ?? null;
+  }
+
+  async listRoles(cityId: string, userAccountId: string): Promise<string[]> {
+    return [...(this.roles.get(this.roleKey(cityId, userAccountId)) ?? [])];
+  }
+
+  async grantRole(
+    cityId: string,
+    userAccountId: string,
+    role: string,
+  ): Promise<void> {
+    const key = this.roleKey(cityId, userAccountId);
+    const current = this.roles.get(key) ?? new Set<string>();
+    current.add(role);
+    this.roles.set(key, current);
   }
 
   async saveVerificationToken(

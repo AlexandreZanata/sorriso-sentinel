@@ -83,8 +83,51 @@ grep -q '<!DOCTYPE html>' /tmp/route-body.json && pass "GET /docs HTML" || fail 
 grep -q '/occurrences/:id/confirm' /tmp/route-body.json && pass "GET /docs contains confirm route" || fail "GET /docs confirm route"
 
 expect_status "GET /docs/spec.json" 200 "${api_url}/docs/spec.json"
-grep -q '"endpoints"' /tmp/route-body.json && pass "GET /docs/spec.json structure" || fail "GET /docs/spec.json structure" "$(cat /tmp/route-body.json)"
-grep -q '"version"' /tmp/route-body.json && pass "GET /docs/spec.json version" || fail "GET /docs/spec.json version" "$(cat /tmp/route-body.json)"
+cp /tmp/route-body.json /tmp/docs-spec.json
+grep -q '"endpoints"' /tmp/docs-spec.json && pass "GET /docs/spec.json structure" || fail "GET /docs/spec.json structure" "$(cat /tmp/docs-spec.json)"
+grep -q '"version"' /tmp/docs-spec.json && pass "GET /docs/spec.json version" || fail "GET /docs/spec.json version" "$(cat /tmp/docs-spec.json)"
+
+python3 -c "import json; spec=json.load(open('/tmp/docs-spec.json')); exit(0 if len(spec.get('endpoints',[]))==26 else 1)" \
+  && pass "GET /docs/spec.json endpoint count (26)" \
+  || fail "GET /docs/spec.json endpoint count" "$(python3 -c "import json; print(len(json.load(open('/tmp/docs-spec.json')).get('endpoints',[])))")"
+
+declare -a DOC_ROUTE_PATHS=(
+  '/health'
+  '/health/live'
+  '/health/ready'
+  '/sessions/bootstrap'
+  '/occurrences'
+  '/occurrences/:id'
+  '/occurrences/:id/comments'
+  '/occurrences/:id/confirm'
+  '/occurrences/:id/deny'
+  '/occurrences/:id/media/upload-slots'
+  '/media/upload-slots/:slotId/complete'
+  '/occurrences/:id/media'
+  '/identity/mode'
+  '/identity/rotate'
+  '/auth/login'
+  '/auth/refresh'
+  '/auth/logout'
+  '/user-accounts/register'
+  '/user-accounts/verify-email'
+  '/user-accounts/me'
+  '/user-accounts/me/profile-photo'
+  '/admin/audit-summary'
+)
+
+for route_path in "${DOC_ROUTE_PATHS[@]}"; do
+  grep -q "\"path\":\"${route_path}\"" /tmp/docs-spec.json \
+    && pass "spec.json documents ${route_path}" \
+    || fail "spec.json missing path ${route_path}"
+done
+
+curl -s -o /tmp/docs-html.json "${api_url}/docs"
+for route_path in "${DOC_ROUTE_PATHS[@]}"; do
+  grep -q "${route_path}" /tmp/docs-html.json \
+    && pass "GET /docs HTML contains ${route_path}" \
+    || fail "GET /docs HTML missing ${route_path}"
+done
 
 echo ""
 echo "--- Sessions ---"
@@ -359,6 +402,32 @@ expect_status "POST /occurrences/:id/deny (self-validation -> 403)" 403 \
   -H 'Content-Type: application/json' \
   -d '{"version":2,"reason":"false_alarm"}'
 
+deny_voter_key_ref="${local_key_ref}-deny-voter"
+expect_status "POST /sessions/bootstrap (deny voter -> 201)" 201 \
+  -X POST "${api_url}/sessions/bootstrap" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"localKeyRef\":\"${deny_voter_key_ref}\"}"
+
+deny_voter_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['sessionToken'])")"
+deny_occurrence_version="$(docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT version FROM occurrences WHERE id = '${occurrence_id}';" | tr -d '[:space:]')"
+
+expect_status "POST /occurrences/:id/deny (valid -> 200)" 200 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/deny" \
+  -H "Authorization: Bearer ${deny_voter_token}" \
+  -H 'Content-Type: application/json' \
+  -d "{\"version\":${deny_occurrence_version},\"reason\":\"false_alarm\"}"
+
+grep -q '"occurrenceId"' /tmp/route-body.json && pass "POST /deny body" || fail "POST /deny body" "$(cat /tmp/route-body.json)"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT COUNT(*) FROM validation_votes WHERE occurrence_id = '${occurrence_id}' AND vote_type = 'deny';" \
+  | grep -q 1 \
+  && pass "POST /deny persisted validation vote" \
+  || fail "POST /deny persisted validation vote"
+
 stale_voter_key_ref="${local_key_ref}-stale-voter"
 expect_status "POST /sessions/bootstrap (stale-version voter -> 201)" 201 \
   -X POST "${api_url}/sessions/bootstrap" \
@@ -420,17 +489,18 @@ echo "--- User accounts ---"
 pqc_ref="$(printf 'a%.0s' {1..64})"
 pqc_signature="$(python3 -c "import base64; print(base64.urlsafe_b64encode(b'valid-dev-signature').decode())")"
 user_email="docker.user.${RANDOM}@example.com"
+user_password="docker-secure-password-12"
 
 expect_status "POST /user-accounts/register (no session -> 401)" 401 \
   -X POST "${api_url}/user-accounts/register" \
   -H 'Content-Type: application/json' \
-  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
+  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"password\":\"${user_password}\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
 
 expect_status "POST /user-accounts/register (valid -> 201)" 201 \
   -X POST "${api_url}/user-accounts/register" \
   -H "Authorization: Bearer ${token}" \
   -H 'Content-Type: application/json' \
-  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
+  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"password\":\"${user_password}\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
 
 user_account_id="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['userAccountId'])")"
 verification_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['verificationToken'])")"
@@ -468,6 +538,111 @@ expect_status "PATCH /user-accounts/me/profile-photo (valid -> 200)" 200 \
   -d '{"storageKey":"profiles/docker-user.jpg","visibility":"public"}'
 
 grep -q '"visibility":"public"' /tmp/route-body.json && pass "PATCH /me/profile-photo visibility" || fail "PATCH /me/profile-photo" "$(cat /tmp/route-body.json)"
+
+echo ""
+echo "--- Auth (JWT login / refresh / admin) ---"
+expect_status "POST /auth/refresh (invalid body -> 400)" 400 \
+  -X POST "${api_url}/auth/refresh" \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+
+expect_status "POST /auth/logout (invalid body -> 400)" 400 \
+  -X POST "${api_url}/auth/logout" \
+  -H 'Content-Type: application/json' \
+  -d '{"extra":true}'
+
+expect_status "POST /auth/login (invalid credentials -> 401)" 401 \
+  -X POST "${api_url}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"email\":\"${user_email}\",\"password\":\"wrong-password-12\"}"
+
+expect_status "POST /auth/login (valid -> 200)" 200 \
+  -X POST "${api_url}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"email\":\"${user_email}\",\"password\":\"${user_password}\"}"
+
+access_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['accessToken'])")"
+refresh_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['refreshToken'])")"
+grep -q '"tokenType":"Bearer"' /tmp/route-body.json && pass "POST /auth/login returns Bearer tokens" || fail "POST /auth/login tokenType" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /user-accounts/me (JWT access -> 200)" 200 \
+  -H "Authorization: Bearer ${access_token}" \
+  "${api_url}/user-accounts/me"
+
+expect_status "GET /admin/audit-summary (no auth -> 401)" 401 \
+  "${api_url}/admin/audit-summary"
+
+expect_status "GET /admin/audit-summary (no admin role -> 403)" 403 \
+  -H "Authorization: Bearer ${access_token}" \
+  "${api_url}/admin/audit-summary"
+
+expect_status "POST /auth/refresh (valid -> 200)" 200 \
+  -X POST "${api_url}/auth/refresh" \
+  -H 'Content-Type: application/json' \
+  -d "{\"refreshToken\":\"${refresh_token}\"}"
+
+new_refresh_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['refreshToken'])")"
+grep -q '"accessToken":' /tmp/route-body.json && pass "POST /auth/refresh returns new access token" || fail "POST /auth/refresh body" "$(cat /tmp/route-body.json)"
+
+expect_status "POST /auth/logout (valid -> 200)" 200 \
+  -X POST "${api_url}/auth/logout" \
+  -H 'Content-Type: application/json' \
+  -d "{\"refreshToken\":\"${new_refresh_token}\"}"
+
+expect_status "POST /auth/refresh (revoked -> 401)" 401 \
+  -X POST "${api_url}/auth/refresh" \
+  -H 'Content-Type: application/json' \
+  -d "{\"refreshToken\":\"${new_refresh_token}\"}"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -c \
+  "INSERT INTO user_account_roles (user_account_id, city_id, role) VALUES ('${user_account_id}', '${city_id}', 'city_admin') ON CONFLICT DO NOTHING;" >/dev/null
+
+expect_status "POST /auth/login (admin user -> 200)" 200 \
+  -X POST "${api_url}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"email\":\"${user_email}\",\"password\":\"${user_password}\"}"
+
+admin_access_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['accessToken'])")"
+
+expect_status "GET /admin/audit-summary (city_admin -> 200)" 200 \
+  -H "Authorization: Bearer ${admin_access_token}" \
+  "${api_url}/admin/audit-summary"
+
+grep -q '"status":"ok"' /tmp/route-body.json && pass "GET /admin/audit-summary body" || fail "GET /admin/audit-summary body" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /user-accounts/me (city mismatch header -> 403)" 403 \
+  -H "Authorization: Bearer ${admin_access_token}" \
+  -H "x-city-id: 01932f1a-0000-7000-8000-000000000099" \
+  "${api_url}/user-accounts/me"
+
+echo ""
+echo "--- User account erasure (LGPD) ---"
+expect_status "DELETE /user-accounts/me (no session -> 401)" 401 \
+  -X DELETE "${api_url}/user-accounts/me"
+
+expect_status "DELETE /user-accounts/me (valid -> 204)" 204 \
+  -X DELETE "${api_url}/user-accounts/me" \
+  -H "Authorization: Bearer ${admin_access_token}"
+
+[[ ! -s /tmp/route-body.json ]] && pass "DELETE /user-accounts/me empty body" \
+  || fail "DELETE /user-accounts/me body not empty" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /user-accounts/me (after erasure -> 200 deleted)" 200 \
+  -H "Authorization: Bearer ${admin_access_token}" \
+  "${api_url}/user-accounts/me"
+
+grep -q '"status":"deleted"' /tmp/route-body.json && pass "GET /me after erasure status deleted" \
+  || fail "GET /me after erasure status" "$(cat /tmp/route-body.json)"
+grep -q 'anonymous.local' /tmp/route-body.json && pass "GET /me after erasure anonymized email" \
+  || fail "GET /me after erasure email" "$(cat /tmp/route-body.json)"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT status FROM user_accounts WHERE id = '${user_account_id}';" \
+  | grep -q deleted \
+  && pass "DELETE /me persisted deleted status" \
+  || fail "DELETE /me persisted deleted status"
 
 echo ""
 echo "==> Summary: ${passed} passed, ${failed} failed"

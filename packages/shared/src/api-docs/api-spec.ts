@@ -5,6 +5,7 @@ const EXAMPLE_OCCURRENCE_ID = '01932f1a-0000-7000-8000-000000000042';
 const EXAMPLE_CONTRIBUTOR_ID = '01932f1a-0000-7000-8000-000000000010';
 const EXAMPLE_REPUTATION_ID = 'Rep-A1B2C';
 const EXAMPLE_USER_ACCOUNT_ID = '01932f1a-0000-7000-8000-000000000099';
+const EXAMPLE_MEDIA_SLOT_ID = '01932f1a-0000-7000-8000-000000000088';
 const EXAMPLE_PQC_REF = 'a'.repeat(64);
 
 export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
@@ -16,8 +17,9 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
   authNotes: [
     'Public routes do not require Authorization.',
     'Session routes require: Authorization: Bearer <sessionToken>',
-    'Obtain a session token via POST /sessions/bootstrap.',
-    'Session tokens expire after 24 hours (HMAC-signed payload).',
+    'Obtain a session token via POST /sessions/bootstrap (HMAC, 24h) or POST /auth/login (JWT access, 15 min).',
+    'Refresh tokens from POST /auth/login rotate on POST /auth/refresh; revoke family via POST /auth/logout.',
+    'Optional header x-city-id must match token city_id when present (403 CITY_MISMATCH).',
   ],
   exampleCityId: EXAMPLE_CITY_ID,
   endpoints: [
@@ -541,6 +543,129 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
       ],
     },
     {
+      id: 'media-upload-slot',
+      group: 'Media',
+      method: 'POST',
+      path: '/occurrences/:id/media/upload-slots',
+      summary: 'Request media upload slot',
+      description:
+        'Issues a presigned PUT URL for image upload. Rate limited per reputationId. Occurrence author only.',
+      auth: 'session',
+      statusCodes: [
+        { status: 201, description: 'Slot created with presigned URL' },
+        { status: 400, description: 'Invalid content type or size' },
+        { status: 401, description: 'Missing session' },
+        { status: 403, description: 'Not occurrence author or limit reached' },
+        { status: 404, description: 'Occurrence not found' },
+      ],
+      headers: [
+        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <sessionToken>' },
+      ],
+      pathParams: [
+        { name: 'id', type: 'uuid', required: true, description: 'Occurrence id' },
+      ],
+      requestBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'contentType', type: 'string', required: true, description: 'image/jpeg only (v1)' },
+          { name: 'contentLength', type: 'integer', required: true, description: 'File size in bytes' },
+        ],
+        example: { contentType: 'image/jpeg', contentLength: 2048 },
+      },
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'slotId', type: 'uuid', required: true, description: 'Media asset id' },
+          { name: 'uploadUrl', type: 'string', required: true, description: 'Presigned PUT URL' },
+          { name: 'expiresAt', type: 'string', required: true, description: 'ISO 8601 expiry' },
+        ],
+        example: {
+          slotId: EXAMPLE_MEDIA_SLOT_ID,
+          uploadUrl: 'http://127.0.0.1:9000/sorriso-sentinel-media/raw/...',
+          expiresAt: '2026-06-15T12:15:00.000Z',
+        },
+      },
+      errors: [
+        { status: 403, code: 'MEDIA_LIMIT_REACHED', description: 'Max images per occurrence' },
+        { status: 429, code: 'RATE_LIMIT_EXCEEDED', description: 'Upload slots per hour' },
+      ],
+    },
+    {
+      id: 'media-complete-upload',
+      group: 'Media',
+      method: 'POST',
+      path: '/media/upload-slots/:slotId/complete',
+      summary: 'Complete media upload',
+      description:
+        'Verifies object in storage and triggers inline EXIF stripping. Returns processing or ready status.',
+      auth: 'session',
+      statusCodes: [
+        { status: 202, description: 'Upload accepted for processing' },
+        { status: 400, description: 'Key mismatch' },
+        { status: 401, description: 'Missing session' },
+        { status: 404, description: 'Slot not found' },
+      ],
+      headers: [
+        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <sessionToken>' },
+      ],
+      pathParams: [
+        { name: 'slotId', type: 'uuid', required: true, description: 'Upload slot id' },
+      ],
+      requestBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'uploadedKey', type: 'string', required: true, description: 'Raw storage key from slot' },
+        ],
+        example: { uploadedKey: 'raw/01932f1a-0000-7000-8000-000000000088.jpg' },
+      },
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'id', type: 'uuid', required: true, description: 'Media asset id' },
+          { name: 'status', type: 'string', required: true, description: 'processing or ready' },
+        ],
+        example: { id: EXAMPLE_MEDIA_SLOT_ID, status: 'ready' },
+      },
+      errors: [],
+    },
+    {
+      id: 'media-list',
+      group: 'Media',
+      method: 'GET',
+      path: '/occurrences/:id/media',
+      summary: 'List occurrence media',
+      description: 'Returns ready media items with public URLs. Quarantine keys are never exposed.',
+      auth: 'session',
+      statusCodes: [
+        { status: 200, description: 'Media list' },
+        { status: 401, description: 'Missing session' },
+        { status: 404, description: 'Occurrence not found' },
+      ],
+      headers: [
+        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <sessionToken>' },
+      ],
+      pathParams: [
+        { name: 'id', type: 'uuid', required: true, description: 'Occurrence id' },
+      ],
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'items', type: 'array', required: true, description: 'Ready media assets' },
+        ],
+        example: {
+          items: [
+            {
+              id: EXAMPLE_MEDIA_SLOT_ID,
+              contentType: 'image/jpeg',
+              status: 'ready',
+              url: 'http://127.0.0.1:9000/sorriso-sentinel-media/ready/...',
+            },
+          ],
+        },
+      },
+      errors: [],
+    },
+    {
       id: 'identity-mode',
       group: 'Identity',
       method: 'PATCH',
@@ -633,6 +758,118 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
       ],
     },
     {
+      id: 'auth-login',
+      group: 'Auth',
+      method: 'POST',
+      path: '/auth/login',
+      summary: 'Login with email and password',
+      description:
+        'Authenticates verified active account. Returns short-lived JWT access token and revocable refresh token.',
+      auth: 'public',
+      statusCodes: [
+        { status: 200, description: 'Tokens issued' },
+        { status: 400, description: 'Validation error' },
+        { status: 401, description: 'Invalid credentials' },
+        { status: 403, description: 'Account not active or email unverified' },
+      ],
+      requestBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'cityId', type: 'uuid', required: true, description: 'Tenant city id' },
+          { name: 'email', type: 'string', required: true, description: 'Account email' },
+          { name: 'password', type: 'string', required: true, description: 'Min 12 characters' },
+        ],
+        example: {
+          cityId: EXAMPLE_CITY_ID,
+          email: 'civic.user@example.com',
+          password: 'secure-password-12',
+        },
+      },
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'accessToken', type: 'string', required: true, description: 'JWT access token (15 min)' },
+          { name: 'refreshToken', type: 'string', required: true, description: 'Opaque refresh token (7 days)' },
+          { name: 'expiresInSeconds', type: 'integer', required: true, description: 'Access token TTL' },
+          { name: 'tokenType', type: 'string', required: true, description: 'Bearer' },
+        ],
+        example: {
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          refreshToken: 'xK9mP2nQ7vR4sT1wY6zA3bC',
+          expiresInSeconds: 900,
+          tokenType: 'Bearer',
+        },
+      },
+      errors: [
+        { status: 401, code: 'INVALID_CREDENTIALS', description: 'Wrong email or password' },
+        { status: 403, code: 'ACCOUNT_NOT_ACTIVE', description: 'Pending verification or suspended' },
+      ],
+    },
+    {
+      id: 'auth-refresh',
+      group: 'Auth',
+      method: 'POST',
+      path: '/auth/refresh',
+      summary: 'Refresh access token',
+      description: 'Rotates refresh token and issues new JWT access token. Old refresh token is revoked.',
+      auth: 'public',
+      statusCodes: [
+        { status: 200, description: 'New token pair' },
+        { status: 400, description: 'Validation error' },
+        { status: 401, description: 'Invalid or revoked refresh token' },
+      ],
+      requestBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'refreshToken', type: 'string', required: true, description: 'Refresh token from login' },
+        ],
+        example: { refreshToken: 'xK9mP2nQ7vR4sT1wY6zA3bC' },
+      },
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'accessToken', type: 'string', required: true, description: 'New JWT' },
+          { name: 'refreshToken', type: 'string', required: true, description: 'Rotated refresh token' },
+          { name: 'expiresInSeconds', type: 'integer', required: true, description: 'Access TTL' },
+          { name: 'tokenType', type: 'string', required: true, description: 'Bearer' },
+        ],
+        example: {
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          refreshToken: 'newRefreshTokenValue',
+          expiresInSeconds: 900,
+          tokenType: 'Bearer',
+        },
+      },
+      errors: [{ status: 401, code: 'INVALID_REFRESH_TOKEN', description: 'Expired or revoked' }],
+    },
+    {
+      id: 'auth-logout',
+      group: 'Auth',
+      method: 'POST',
+      path: '/auth/logout',
+      summary: 'Logout and revoke refresh tokens',
+      description: 'Revokes entire refresh token family. Access token remains valid until expiry.',
+      auth: 'public',
+      statusCodes: [
+        { status: 200, description: 'Refresh tokens revoked' },
+        { status: 400, description: 'Validation error' },
+        { status: 401, description: 'Unknown refresh token' },
+      ],
+      requestBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'refreshToken', type: 'string', required: true, description: 'Refresh token to revoke' },
+        ],
+        example: { refreshToken: 'xK9mP2nQ7vR4sT1wY6zA3bC' },
+      },
+      responseBody: {
+        contentType: 'application/json',
+        fields: [{ name: 'revoked', type: 'boolean', required: true, description: 'Always true' }],
+        example: { revoked: true },
+      },
+      errors: [{ status: 401, code: 'INVALID_REFRESH_TOKEN', description: 'Token not found' }],
+    },
+    {
       id: 'user-register',
       group: 'User accounts',
       method: 'POST',
@@ -654,6 +891,7 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
         fields: [
           { name: 'email', type: 'string', required: true, description: 'Email address (max 254)' },
           { name: 'displayName', type: 'string', required: true, description: '2–64 chars' },
+          { name: 'password', type: 'string', required: true, description: 'Min 12 characters (bcrypt hashed)' },
           { name: 'deviceNonce', type: 'string', required: true, description: '8–128 chars' },
           { name: 'pqcPublicKeyRef', type: 'string', required: true, description: '64 hex chars (ML-DSA fingerprint)' },
           { name: 'pqcSignature', type: 'string', required: true, description: 'Device signature (base64url or hex)' },
@@ -662,6 +900,7 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
         example: {
           email: 'civic.user@example.com',
           displayName: 'Civic User',
+          password: 'secure-password-12',
           deviceNonce: 'nonce-docker-001',
           pqcPublicKeyRef: EXAMPLE_PQC_REF,
           pqcSignature: 'dmFsaWQtZGV2LXNpZ25hdHVyZQ',
@@ -881,6 +1120,32 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
         { name: 'Authorization', type: 'string', required: true, description: 'Bearer <sessionToken>' },
       ],
       errors: [{ status: 404, code: 'USER_ACCOUNT_NOT_FOUND', description: 'No account linked' }],
+    },
+    {
+      id: 'admin-audit-summary',
+      group: 'Admin',
+      method: 'GET',
+      path: '/admin/audit-summary',
+      summary: 'Admin audit summary',
+      description: 'Returns audit summary stub. Requires city_admin role in JWT access token.',
+      auth: 'session',
+      statusCodes: [
+        { status: 200, description: 'Summary returned' },
+        { status: 401, description: 'Missing or invalid token' },
+        { status: 403, description: 'Insufficient role' },
+      ],
+      headers: [
+        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <accessToken or sessionToken>' },
+      ],
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'status', type: 'string', required: true, description: 'ok' },
+          { name: 'message', type: 'string', required: true, description: 'Human-readable status' },
+        ],
+        example: { status: 'ok', message: 'Admin audit summary available' },
+      },
+      errors: [{ status: 403, code: 'INSUFFICIENT_ROLE', description: 'Requires city_admin' }],
     },
   ],
   baseUrlPresets: [

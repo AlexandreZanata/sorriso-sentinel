@@ -79,6 +79,19 @@ Endpoints that allow anonymous access must still:
 - [ ] Admin routes require role + MFA plan documented
 - [ ] Tests: expired token, wrong role, missing `city_id` claim
 
+## MFA plan (admin / sensitive roles)
+
+Before enabling production admin or moderation features:
+
+| Role | MFA method | Enrollment |
+|------|------------|------------|
+| `city_admin` | TOTP (RFC 6238) or WebAuthn | Required at first admin login |
+| `moderator` | TOTP | Required before queue access |
+| `security_audit` | WebAuthn preferred | Hardware key recommended |
+| `lgpd_officer` | TOTP + step-up for export | Required for bulk export |
+
+Step-up flow: short-lived access token remains 15 minutes; sensitive actions require a fresh MFA challenge within the last 5 minutes. MFA secrets stored encrypted; recovery codes hashed like passwords.
+
 ## Related docs
 
 - [IDOR and access control](idor-and-access-control.md)

@@ -6,6 +6,8 @@ export * from './occurrences/list-occurrences.schema.js';
 export * from './validation/add-comment.schema.js';
 export * from './validation/confirm-deny-occurrence.schema.js';
 export * from './validation/validation.config.js';
+export * from './auth/auth.config.js';
+export * from './auth/auth.schema.js';
 export * from './identity/user-account.schema.js';
 export * from './media/media-upload.config.js';
 export * from './media/request-upload-slot.schema.js';

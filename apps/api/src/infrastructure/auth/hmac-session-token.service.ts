@@ -7,6 +7,8 @@ export interface SessionClaims {
   reputationId: string;
   identityMode: 'ghost' | 'pseudonym' | 'public';
   pseudonym: string | null;
+  userAccountId?: string;
+  roles?: string[];
 }
 
 export interface SessionTokenIssuerPort {

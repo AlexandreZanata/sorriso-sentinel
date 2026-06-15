@@ -8,7 +8,9 @@ describe('DocsRenderer', () => {
     const html = renderer.renderHtml('http://127.0.0.1:3010', 'en');
 
     expect(html).toContain('<!DOCTYPE html>');
-    expect(html).toContain('/occurrences/:id/confirm');
+    expect(html).toContain('/auth/login');
+    expect(html).toContain('/admin/audit-summary');
+    expect(html).toContain('/occurrences/:id/media');
     expect(html).toContain('/user-accounts/me');
     expect(html).toContain('/docs/spec.json');
     expect(html).toContain('docs-theme-toggle');
@@ -19,10 +21,10 @@ describe('DocsRenderer', () => {
     expect(html).toContain('docs-auth-token');
   });
 
-  it('should_return_spec_with_nineteen_endpoints', () => {
+  it('should_return_spec_with_twenty_six_endpoints', () => {
     const spec = renderer.getSpec('http://127.0.0.1:3010');
 
-    expect(spec.endpoints).toHaveLength(19);
+    expect(spec.endpoints).toHaveLength(26);
     expect(spec.baseUrl).toBe('http://127.0.0.1:3010');
   });
 

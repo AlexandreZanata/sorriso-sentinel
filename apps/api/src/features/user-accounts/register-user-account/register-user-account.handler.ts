@@ -26,6 +26,10 @@ import {
   decodePqcSignature,
 } from '../../../infrastructure/identity/device-binding.service';
 import {
+  PASSWORD_HASHER,
+  type PasswordHasherPort,
+} from '../../../infrastructure/auth/bcrypt-password-hasher.service';
+import {
   createVerificationToken,
   hashVerificationToken,
 } from '../../../infrastructure/reputation/stub-reputation.port';
@@ -49,6 +53,8 @@ export class RegisterUserAccountHandler {
     private readonly abuseSignal: AbuseSignalPort,
     @Inject(PQC_CRYPTO_PORT)
     private readonly pqcCrypto: PqcCryptoPort,
+    @Inject(PASSWORD_HASHER)
+    private readonly passwordHasher: PasswordHasherPort,
   ) {}
 
   async execute(
@@ -111,8 +117,14 @@ export class RegisterUserAccountHandler {
     const verificationToken = createVerificationToken();
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + 24 * 60 * 60 * 1000);
+    const passwordHash = await this.passwordHasher.hash(parsed.data.password);
 
     await this.accounts.save(account.toProps());
+    await this.accounts.setPasswordHash(
+      session.cityId,
+      account.id,
+      passwordHash,
+    );
     await this.accounts.saveVerificationToken(account.id, {
       tokenHash: hashVerificationToken(verificationToken),
       issuedAt,
