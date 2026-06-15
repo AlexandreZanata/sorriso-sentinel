@@ -64,6 +64,8 @@ Other contributors can:
 
 **Never trust a single person** — consensus required. See Principle 9 in [privacy and identity](privacy-and-identity.md).
 
+> **Implementation detail:** [Community validation feature module](../features/community-validation/README.md) — permissions, confidence rules, domain methods, TDD plan.
+
 **Domain events**: `OccurrenceConfirmed`, `OccurrenceDenied`, `EvidenceAttached`, `CommentAdded`
 
 ## 3. Confidence gain

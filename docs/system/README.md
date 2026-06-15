@@ -29,6 +29,7 @@ Security enforcement for privacy rules: [security docs](../security/README.md).
 | [Feature modules index](../features/README.md) | How DDD + TDD specs work per capability |
 | [Anonymity](../features/anonymity/README.md) | Identity modes, permissions, domain model |
 | [Occurrence creation](../features/occurrence-creation/README.md) | Create report — write path, invariants, TDD |
+| [Community validation](../features/community-validation/README.md) | Confirm, deny, comment, consensus |
 
 ## Design references
 

@@ -1,6 +1,6 @@
 # Occurrence Creation — Business Rules
 
-Rules for **creating** an occurrence. Lifecycle transitions after creation belong to the Community validation module.
+Rules for **creating** an occurrence. Lifecycle transitions after creation belong to the [Community validation](../community-validation/README.md) module.
 
 ## Actors
 

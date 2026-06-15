@@ -76,7 +76,7 @@ Test names use behavior style: `should_reject_ghost_identity_when_displaying_sen
 |--------|-----------------|--------|
 | [Anonymity](anonymity/README.md) | Identity & Privacy | Spec complete |
 | [Occurrence creation](occurrence-creation/README.md) | Occurrences | Spec complete |
-| Community validation | Validation | Planned |
+| [Community validation](community-validation/README.md) | Validation | Spec complete |
 | Reputation | Identity & Reputation | Planned |
 | Territorial memory | Territorial Intelligence | Planned |
 | Media upload | Media | Planned |
