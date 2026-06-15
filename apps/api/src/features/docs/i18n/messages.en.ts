@@ -84,6 +84,12 @@ export const MESSAGES_EN: Record<string, string> = {
   'endpoint.occurrences-create.summary': 'Create occurrence',
   'endpoint.occurrences-create.description':
     'Creates an unverified occurrence. Rate limit: 10/hour per reputationId. Sensitive categories force ghost author display.',
+  'endpoint.occurrences-list.summary': 'List occurrences in bbox',
+  'endpoint.occurrences-list.description':
+    'Returns map feed for a bounding box. Excludes hidden privacy level. Max bbox span 0.5 degrees per axis.',
+  'endpoint.occurrences-get.summary': 'Get occurrence detail',
+  'endpoint.occurrences-get.description':
+    'Returns a single occurrence with privacy-aware location and author fields. Sensitive rows may be hidden by RLS.',
   'endpoint.occurrences-comment.summary': 'Add comment',
   'endpoint.occurrences-comment.description':
     'Adds a community comment. Does not change occurrence confidence (INV-V4).',

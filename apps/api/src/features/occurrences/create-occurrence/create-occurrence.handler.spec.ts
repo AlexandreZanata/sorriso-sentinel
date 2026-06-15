@@ -37,6 +37,7 @@ describe('CreateOccurrenceHandler', () => {
       save: vi.fn().mockResolvedValue(undefined),
       update: vi.fn().mockResolvedValue(undefined),
       findById: vi.fn().mockResolvedValue(null),
+      listInBbox: vi.fn().mockResolvedValue({ items: [], nextCursor: null }),
     };
     rateLimiter = {
       consume: vi.fn().mockResolvedValue({ allowed: true }),

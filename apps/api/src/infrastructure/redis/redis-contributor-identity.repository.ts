@@ -69,7 +69,17 @@ export class RedisContributorIdentityRepository
     return this.deserialize(raw);
   }
 
-  async findByPseudonym(): Promise<ContributorIdentity | null> {
+  async findByPseudonym(
+    _pseudonym: string,
+    _cityId: string,
+  ): Promise<ContributorIdentity | null> {
+    return null;
+  }
+
+  async findByReputationId(
+    _reputationId: string,
+    _cityId: string,
+  ): Promise<ContributorIdentity | null> {
     return null;
   }
 

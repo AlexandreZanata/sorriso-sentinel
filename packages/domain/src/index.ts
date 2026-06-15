@@ -9,6 +9,7 @@ export * from './occurrences/value-objects/confidence-level.vo.js';
 export * from './occurrences/value-objects/occurrence-description.vo.js';
 export * from './occurrences/value-objects/problem-location.vo.js';
 export * from './occurrences/services/location-privacy.service.js';
+export * from './occurrences/services/occurrence-read-projection.service.js';
 export * from './identity/value-objects/identity-mode.vo.js';
 export * from './identity/value-objects/pseudonym.vo.js';
 export * from './identity/value-objects/reputation-id.vo.js';

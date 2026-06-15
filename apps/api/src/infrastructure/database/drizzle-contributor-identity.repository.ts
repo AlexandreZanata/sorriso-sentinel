@@ -94,6 +94,21 @@ export class DrizzleContributorIdentityRepository
     });
   }
 
+  async findByReputationId(
+    reputationId: string,
+    cityId: string,
+  ): Promise<ContributorIdentity | null> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const rows = await db
+        .select()
+        .from(contributors)
+        .where(eq(contributors.reputationId, reputationId))
+        .limit(1);
+
+      return rows[0] ? this.toIdentity(rows[0]) : null;
+    });
+  }
+
   private toIdentity(row: typeof contributors.$inferSelect): ContributorIdentity {
     return ContributorIdentity.rehydrate({
       id: row.id,

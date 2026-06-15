@@ -156,6 +156,32 @@ python3 -c "import json; b=json.load(open('/tmp/route-body.json')); exit(0 if 'a
   && pass "POST /occurrences crime omits author" \
   || fail "POST /occurrences crime omits author" "$(cat /tmp/route-body.json)"
 
+expect_status "GET /occurrences (no session -> 401)" 401 \
+  "${api_url}/occurrences?minLatitude=-12.55&maxLatitude=-12.53&minLongitude=-55.73&maxLongitude=-55.71"
+
+expect_status "GET /occurrences (invalid bbox -> 400)" 400 \
+  "${api_url}/occurrences?minLatitude=-12.53&maxLatitude=-12.55&minLongitude=-55.73&maxLongitude=-55.71" \
+  -H "Authorization: Bearer ${token}"
+
+expect_status "GET /occurrences (valid bbox -> 200)" 200 \
+  "${api_url}/occurrences?minLatitude=-12.55&maxLatitude=-12.53&minLongitude=-55.73&maxLongitude=-55.71" \
+  -H "Authorization: Bearer ${token}"
+
+python3 -c "import json; ids=[item['id'] for item in json.load(open('/tmp/route-body.json')).get('items',[])]; exit(0 if '${occurrence_id}' in ids else 1)" \
+  && pass "GET /occurrences includes created id" \
+  || fail "GET /occurrences includes created id" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /occurrences/:id (valid -> 200)" 200 \
+  "${api_url}/occurrences/${occurrence_id}" \
+  -H "Authorization: Bearer ${token}"
+
+grep -q '"privacyLevel":"public"' /tmp/route-body.json && pass "GET /occurrences/:id privacyLevel" || fail "GET /occurrences/:id privacyLevel" "$(cat /tmp/route-body.json)"
+grep -q '"location":{' /tmp/route-body.json && pass "GET /occurrences/:id location present" || fail "GET /occurrences/:id location" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /occurrences/:id (missing -> 404)" 404 \
+  "${api_url}/occurrences/01932f1a-0000-7000-8000-000000009999" \
+  -H "Authorization: Bearer ${token}"
+
 echo ""
 echo "--- Identity ---"
 expect_status "PATCH /identity/mode (no session -> 401)" 401 \
