@@ -77,6 +77,16 @@ grep -q '"redis":"ok"' /tmp/route-body.json && pass "GET /health/ready redis" ||
 grep -q '"postgres":"ok"' /tmp/route-body.json && pass "GET /health/ready postgres" || fail "GET /health/ready postgres" "$(cat /tmp/route-body.json)"
 
 echo ""
+echo "--- Documentation ---"
+expect_status "GET /docs" 200 "${api_url}/docs"
+grep -q '<!DOCTYPE html>' /tmp/route-body.json && pass "GET /docs HTML" || fail "GET /docs HTML" "$(head -c 200 /tmp/route-body.json)"
+grep -q '/occurrences/:id/confirm' /tmp/route-body.json && pass "GET /docs contains confirm route" || fail "GET /docs confirm route"
+
+expect_status "GET /docs/spec.json" 200 "${api_url}/docs/spec.json"
+grep -q '"endpoints"' /tmp/route-body.json && pass "GET /docs/spec.json structure" || fail "GET /docs/spec.json structure" "$(cat /tmp/route-body.json)"
+grep -q '"version"' /tmp/route-body.json && pass "GET /docs/spec.json version" || fail "GET /docs/spec.json version" "$(cat /tmp/route-body.json)"
+
+echo ""
 echo "--- Sessions ---"
 expect_status "POST /sessions/bootstrap" 201 \
   -X POST "${api_url}/sessions/bootstrap" \

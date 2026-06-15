@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { HealthController } from './health/health.controller';
+import { DocsModule } from './features/docs/docs.module';
 import { IdentityModule } from './features/identity/identity.module';
 import { OccurrencesModule } from './features/occurrences/occurrences.module';
 import { UserAccountsModule } from './features/user-accounts/user-accounts.module';
@@ -11,6 +12,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
   imports: [
     DatabaseModule.forRoot(),
     RedisModule.forRoot(),
+    DocsModule,
     IdentityModule,
     OccurrencesModule,
     ValidationModule,
