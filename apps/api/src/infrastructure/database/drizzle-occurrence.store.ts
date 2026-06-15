@@ -12,6 +12,7 @@ import {
   lte,
   ne,
   or,
+  sql,
 } from 'drizzle-orm';
 import type pg from 'pg';
 import {
@@ -170,6 +171,27 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
           : undefined;
 
       return { items, nextCursor };
+    });
+  }
+
+  async countByStatus(
+    cityId: string,
+    status: OccurrenceStatus,
+  ): Promise<number> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const rows = await db
+        .select({
+          count: sql<number>`count(*)::int`,
+        })
+        .from(occurrences)
+        .where(
+          and(
+            eq(occurrences.status, status),
+            isNull(occurrences.deletedAt),
+          ),
+        );
+
+      return rows[0]?.count ?? 0;
     });
   }
 }

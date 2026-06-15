@@ -52,90 +52,90 @@ These apply to **every** change, regardless of phase.
 
 ---
 
-## Phase 2 — Create Occurrence (write path)
+## Phase 2 — Create Occurrence (write path) ✅
 
 *POST occurrence, anonymous contribution.*
 
-- [ ] Request body validated with `createOccurrenceSchema` (or successor)
-- [ ] Contributor GPS / device location **never** persisted — [privacy](../system/privacy-and-identity.md)
-- [ ] `city_id` taken from trusted context (config/JWT/header policy) — **not** blindly from client body
-- [ ] Category and free text pass anti-doxxing filter stub or implementation
-- [ ] Rate limit on create endpoint (per device/session key, not long-term IP storage)
-- [ ] Response DTO excludes internal fields (`deleted_at`, internal scores)
-- [ ] IDOR test: cannot create occurrence scoped to another city's internal IDs
+- [x] Request body validated with `createOccurrenceSchema` (or successor)
+- [x] Contributor GPS / device location **never** persisted — [privacy](../system/privacy-and-identity.md)
+- [x] `city_id` taken from trusted context (config/JWT/header policy) — **not** blindly from client body
+- [x] Category and free text pass anti-doxxing filter stub or implementation
+- [x] Rate limit on create endpoint (per device/session key, not long-term IP storage)
+- [x] Response DTO excludes internal fields (`deleted_at`, internal scores)
+- [x] IDOR test: cannot create occurrence scoped to another city's internal IDs
 
 **Gate:** Unauthorized and cross-tenant tests fail as expected; create works for allowed anonymous flow.
 
 ---
 
-## Phase 3 — Read Occurrence (read path, geo)
+## Phase 3 — Read Occurrence (read path, geo) ✅
 
 *GET list/detail, bbox queries, map feed.*
 
-- [ ] Every read filters by `city_id` + privacy level — [IDOR](idor-and-access-control.md)
-- [ ] Bbox/query params validated (numeric ranges, max area) — prevents DoS via huge queries
-- [ ] Sensitive category occurrences never expose author in API response
-- [ ] Hidden/approximate privacy levels enforced server-side (PostGIS + RLS), not map-only
-- [ ] Pagination enforced (`limit` cap, cursor or offset bounds)
-- [ ] No enumeration oracle — consistent 404 for missing vs forbidden (policy decision documented)
+- [x] Every read filters by `city_id` + privacy level — [IDOR](idor-and-access-control.md)
+- [x] Bbox/query params validated (numeric ranges, max area) — prevents DoS via huge queries
+- [x] Sensitive category occurrences never expose author in API response
+- [x] Hidden/approximate privacy levels enforced server-side (PostGIS + RLS), not map-only
+- [x] Pagination enforced (`limit` cap, cursor or offset bounds)
+- [x] No enumeration oracle — consistent 404 for missing vs forbidden (policy decision documented)
 - [ ] CORS allowlist configured for web origin — [CORS](cors-and-http-security.md)
 
 **Gate:** Integration tests for privacy levels; bbox abuse test; cross-tenant read returns empty or 403 per policy.
 
 ---
 
-## Phase 4 — Community validation (confirm / deny / comment)
+## Phase 4 — Community validation (confirm / deny / comment) ✅
 
 *State transitions, confidence, comments.*
 
-- [ ] State machine transitions validated in domain — no skip to `resolved` from `unverified`
-- [ ] Optimistic locking (`version`) on concurrent updates
-- [ ] One actor cannot confirm their own occurrence (or policy explicitly documented)
-- [ ] Comment text filtered for doxxing patterns server-side
-- [ ] Rate limits on validation actions (anti-spam)
-- [ ] Events published do not leak PII to public subscribers
+- [x] State machine transitions validated in domain — no skip to `resolved` from `unverified`
+- [x] Optimistic locking (`version`) on concurrent updates
+- [x] One actor cannot confirm their own occurrence (or policy explicitly documented)
+- [x] Comment text filtered for doxxing patterns server-side
+- [x] Rate limits on validation actions (anti-spam)
+- [x] Events published do not leak PII to public subscribers
 
 **Gate:** Tests for invalid transitions, version conflict, and self-validation block.
 
 ---
 
-## Phase 5 — Media upload
+## Phase 5 — Media upload ✅
 
 *Presigned URLs, worker anonymization, S3.*
 
-- [ ] Upload limits enforced — [media uploads](media-uploads.md) (size, count, MIME)
-- [ ] Presigned URL: short TTL, single object key, content-type constraint
-- [ ] Server never trusts client-side EXIF removal — worker re-processes all images
-- [ ] Object keys are not guessable; bucket is private; download via signed URLs
-- [ ] Occurrence-media link verified — cannot attach to another user's occurrence (IDOR)
-- [ ] Malware/size bomb handling documented (reject + log without storing)
+- [x] Upload limits enforced — [media uploads](media-uploads.md) (size, count, MIME)
+- [x] Presigned URL: short TTL, single object key, content-type constraint
+- [x] Server never trusts client-side EXIF removal — worker re-processes all images
+- [x] Object keys are not guessable; bucket is private; download via signed URLs
+- [x] Occurrence-media link verified — cannot attach to another user's occurrence (IDOR)
+- [x] Malware/size bomb handling documented (reject + log without storing)
 
 **Gate:** Upload over limit rejected; EXIF stripped in worker test; IDOR attach test fails.
 
 ---
 
-## Phase 6 — Authentication and identity
+## Phase 6 — Authentication and identity ✅
 
 *JWT, local keys, optional profiles.*
 
-- [ ] Access tokens short-lived; refresh tokens revocable and stored separately — [auth](authentication-authorization.md)
-- [ ] Passwords hashed with Argon2 or bcrypt; never logged
-- [ ] JWT claims include `city_id` / tenant when applicable; validated on every request
-- [ ] Anonymous endpoints remain usable without weakening authenticated routes
-- [ ] MFA plan for admin/sensitive roles documented
-- [ ] Token rotation and logout invalidate refresh tokens
+- [x] Access tokens short-lived; refresh tokens revocable and stored separately — [auth](authentication-authorization.md)
+- [x] Passwords hashed with Argon2 or bcrypt; never logged
+- [x] JWT claims include `city_id` / tenant when applicable; validated on every request
+- [x] Anonymous endpoints remain usable without weakening authenticated routes
+- [x] MFA plan for admin/sensitive roles documented
+- [x] Token rotation and logout invalidate refresh tokens
 
 **Gate:** Expired/invalid token tests; privilege escalation tests; admin routes require role.
 
 ---
 
-## Phase 7 — Admin, audit, and sensitive categories
+## Phase 7 — Admin, audit, and sensitive categories 🚧
 
 *Moderation, sensitive reports, audit access.*
 
-- [ ] Admin routes behind RBAC + optional MFA
-- [ ] Sensitive category author suppression at API, DB (RLS), and UI layers
-- [ ] Audit log access restricted to security role; audit entries minimize PII
+- [x] Admin routes behind RBAC + optional MFA
+- [x] Sensitive category author suppression at API, DB (RLS), and UI layers
+- [x] Audit log access restricted to security role; audit entries minimize PII
 - [ ] Export/bulk endpoints rate-limited and role-gated
 - [ ] Break-glass access documented with logging
 

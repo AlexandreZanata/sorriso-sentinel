@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 7 admin slice: `occurrence_audit` table, audit summary read model, `GET /admin/audit-summary`
+- `GET /admin/moderation-queue` with `moderator` / `city_admin` RBAC
+- Anonymity Step 7 RLS integration tests and `docker-validate` RLS checks
+- `sentinel_app` non-superuser runtime DB role so RLS applies in Docker and local API
+- Roles `security_audit` and `moderator` wired to admin routes with 401/403 integration tests
 - Local development environment: Node tooling, Husky git hooks, commitlint, Makefile
 - `docs/contributing/development-setup.md` and `docs/contributing/branches.md`
 - CI parity via `npm run validate` and `make check`
@@ -17,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Production and Docker deployment docs (`docs/deployment/`)
 - Expo SDK 54 (React Native 0.81, React 19.1)
 - Fix markdownlint scanning nested `node_modules` in workspaces
+
+### Changed
+
+- `GET /admin/audit-summary` returns real audit metrics (requires `security_audit` or `city_admin`)
+- Phase gate checklist: Phases 2–6 marked complete; Phase 7 opened
 
 ## [0.1.0] - 2026-06-15
 

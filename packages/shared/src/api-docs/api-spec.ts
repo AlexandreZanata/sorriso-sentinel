@@ -1127,7 +1127,8 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
       method: 'GET',
       path: '/admin/audit-summary',
       summary: 'Admin audit summary',
-      description: 'Returns audit summary stub. Requires city_admin role in JWT access token.',
+      description:
+        'Returns aggregated audit log metrics for the tenant. Requires security_audit or city_admin role in JWT access token.',
       auth: 'session',
       statusCodes: [
         { status: 200, description: 'Summary returned' },
@@ -1135,17 +1136,107 @@ export const API_DOCUMENTATION_SPEC: ApiDocumentationSpec = {
         { status: 403, description: 'Insufficient role' },
       ],
       headers: [
-        { name: 'Authorization', type: 'string', required: true, description: 'Bearer <accessToken or sessionToken>' },
+        {
+          name: 'Authorization',
+          type: 'string',
+          required: true,
+          description: 'Bearer <accessToken or sessionToken>',
+        },
       ],
       responseBody: {
         contentType: 'application/json',
         fields: [
           { name: 'status', type: 'string', required: true, description: 'ok' },
-          { name: 'message', type: 'string', required: true, description: 'Human-readable status' },
+          { name: 'cityId', type: 'string', required: true, description: 'Tenant city UUID' },
+          {
+            name: 'totalEntries',
+            type: 'number',
+            required: true,
+            description: 'Total audit log entries for the city',
+          },
+          {
+            name: 'sensitiveEntries',
+            type: 'number',
+            required: true,
+            description: 'Audit entries flagged as sensitive',
+          },
+          {
+            name: 'lastRecordedAt',
+            type: 'string | null',
+            required: true,
+            description: 'ISO timestamp of the latest audit entry',
+          },
+          {
+            name: 'actionCounts',
+            type: 'object',
+            required: true,
+            description: 'Counts grouped by audit action',
+          },
         ],
-        example: { status: 'ok', message: 'Admin audit summary available' },
+        example: {
+          status: 'ok',
+          cityId: '01932f1a-0000-7000-8000-000000000001',
+          totalEntries: 2,
+          sensitiveEntries: 1,
+          lastRecordedAt: '2026-06-15T12:00:00.000Z',
+          actionCounts: { occurrence_created: 2 },
+        },
       },
-      errors: [{ status: 403, code: 'INSUFFICIENT_ROLE', description: 'Requires city_admin' }],
+      errors: [
+        {
+          status: 403,
+          code: 'INSUFFICIENT_ROLE',
+          description: 'Requires security_audit or city_admin',
+        },
+      ],
+    },
+    {
+      id: 'admin-moderation-queue',
+      group: 'Admin',
+      method: 'GET',
+      path: '/admin/moderation-queue',
+      summary: 'Moderation queue summary',
+      description:
+        'Returns pending review counts for the tenant. Requires moderator or city_admin role in JWT access token.',
+      auth: 'session',
+      statusCodes: [
+        { status: 200, description: 'Queue summary returned' },
+        { status: 401, description: 'Missing or invalid token' },
+        { status: 403, description: 'Insufficient role' },
+      ],
+      headers: [
+        {
+          name: 'Authorization',
+          type: 'string',
+          required: true,
+          description: 'Bearer <accessToken or sessionToken>',
+        },
+      ],
+      responseBody: {
+        contentType: 'application/json',
+        fields: [
+          { name: 'status', type: 'string', required: true, description: 'ok' },
+          { name: 'cityId', type: 'string', required: true, description: 'Tenant city UUID' },
+          {
+            name: 'pendingReviewCount',
+            type: 'number',
+            required: true,
+            description: 'Occurrences awaiting moderator review',
+          },
+        ],
+        example: {
+          status: 'ok',
+          cityId: '01932f1a-0000-7000-8000-000000000001',
+          pendingReviewCount: 3,
+        },
+      },
+      errors: [
+        {
+          status: 403,
+          code: 'INSUFFICIENT_ROLE',
+          description: 'Requires moderator or city_admin',
+        },
+      ],
     },
   ],
   baseUrlPresets: [

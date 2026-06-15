@@ -5,6 +5,7 @@ import * as contributorsSchema from './schema/contributors.js';
 import * as occurrenceCommentsSchema from './schema/occurrence-comments.js';
 import * as occurrencesSchema from './schema/occurrences.js';
 import * as mediaAssetsSchema from './schema/media-assets.js';
+import * as occurrenceAuditSchema from './schema/occurrence-audit.js';
 import * as userAccountsSchema from './schema/user-accounts.js';
 import * as validationVotesSchema from './schema/validation-votes.js';
 
@@ -16,6 +17,7 @@ export const schema = {
   ...userAccountsSchema,
   ...authSchema,
   ...mediaAssetsSchema,
+  ...occurrenceAuditSchema,
 };
 
 export type Database = NodePgDatabase<typeof schema>;
@@ -62,3 +64,4 @@ export { validationVotes } from './schema/validation-votes.js';
 export { userAccounts, emailVerificationTokens } from './schema/user-accounts.js';
 export { refreshTokens, userAccountRoles } from './schema/auth.js';
 export { mediaAssets } from './schema/media-assets.js';
+export { occurrenceAudit } from './schema/occurrence-audit.js';

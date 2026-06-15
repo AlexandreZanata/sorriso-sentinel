@@ -209,5 +209,6 @@ describe('Auth identity integration', () => {
       .expect(200);
 
     expect(response.body.status).toBe('ok');
+    expect(response.body).toHaveProperty('totalEntries');
   });
 });

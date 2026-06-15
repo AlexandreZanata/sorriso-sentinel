@@ -70,3 +70,7 @@ export * from './media/value-objects/storage-key.vo.js';
 export * from './media/ports/media-asset.repository.port.js';
 export * from './media/ports/object-storage.port.js';
 export * from './media/ports/media-job-queue.port.js';
+export * from './audit/value-objects/audit-action.vo.js';
+export * from './audit/ports/audit-log.repository.port.js';
+export * from './audit/services/audit-snapshot.sanitizer.js';
+export * from './audit/services/audit-summary.service.js';

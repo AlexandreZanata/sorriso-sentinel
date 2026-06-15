@@ -65,6 +65,7 @@ describe('CastValidationVoteHandler', () => {
       update: vi.fn().mockResolvedValue(undefined),
       findById: vi.fn().mockResolvedValue(baseStoredOccurrence()),
       listInBbox: vi.fn(),
+      countByStatus: vi.fn().mockResolvedValue(0),
     };
     votes = {
       save: vi.fn().mockResolvedValue(undefined),

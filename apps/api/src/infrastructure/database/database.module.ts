@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   ABUSE_SIGNAL_PORT,
+  AUDIT_LOG_REPOSITORY,
   CONTRIBUTOR_IDENTITY_REPOSITORY,
   PQC_CRYPTO_PORT,
   USER_ACCOUNT_REPOSITORY,
@@ -42,6 +43,12 @@ import {
 } from '../validation/drizzle-validation-vote.repository';
 import { DATABASE_POOL } from './database.tokens';
 import { DrizzleContributorIdentityRepository } from './drizzle-contributor-identity.repository';
+import {
+  auditLogRepositoryProvider,
+} from '../audit/drizzle-audit-log.repository';
+import {
+  InMemoryAuditLogRepository,
+} from '../audit/in-memory-audit-log.repository';
 import {
   DrizzleOccurrenceCommentStore,
   InMemoryOccurrenceCommentStore,
@@ -105,6 +112,10 @@ export class DatabaseModule {
           { provide: ABUSE_SIGNAL_PORT, useClass: InMemoryAbuseSignalService },
           { provide: PQC_CRYPTO_PORT, useClass: DevPqcCryptoService },
           { provide: REPUTATION_PORT, useClass: StubReputationPort },
+          {
+            provide: AUDIT_LOG_REPOSITORY,
+            useClass: InMemoryAuditLogRepository,
+          },
         ],
         exports: [
           DATABASE_POOL,
@@ -118,6 +129,7 @@ export class DatabaseModule {
           ABUSE_SIGNAL_PORT,
           PQC_CRYPTO_PORT,
           REPUTATION_PORT,
+          AUDIT_LOG_REPOSITORY,
         ],
       };
     }
@@ -158,6 +170,7 @@ export class DatabaseModule {
         { provide: ABUSE_SIGNAL_PORT, useClass: RedisAbuseSignalService },
         { provide: PQC_CRYPTO_PORT, useClass: DevPqcCryptoService },
         { provide: REPUTATION_PORT, useClass: StubReputationPort },
+        auditLogRepositoryProvider,
       ],
       exports: [
         DATABASE_POOL,
@@ -171,6 +184,7 @@ export class DatabaseModule {
         ABUSE_SIGNAL_PORT,
         PQC_CRYPTO_PORT,
         REPUTATION_PORT,
+        AUDIT_LOG_REPOSITORY,
       ],
     };
   }

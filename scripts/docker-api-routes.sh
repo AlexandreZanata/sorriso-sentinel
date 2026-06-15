@@ -41,8 +41,8 @@ expect_status() {
   fi
 }
 
-echo "==> Starting Postgres, Redis, MinIO, and API"
-docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --build --wait
+echo "==> Starting Postgres, Redis, and MinIO"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --wait postgres redis minio
 
 cleanup() {
   echo "==> Stopping stack"
@@ -58,8 +58,9 @@ for migration in "${migrations_dir}"/0*.sql; do
     psql -U sentinel -d sorriso_sentinel -v ON_ERROR_STOP=1 -f - < "${migration}" >/dev/null
 done
 
-docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" restart api
-sleep 5
+echo "==> Starting API (after migrations and sentinel_app role)"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --build --wait api
+sleep 3
 
 echo ""
 echo "==> Route validation (${api_url})"
@@ -87,8 +88,8 @@ cp /tmp/route-body.json /tmp/docs-spec.json
 grep -q '"endpoints"' /tmp/docs-spec.json && pass "GET /docs/spec.json structure" || fail "GET /docs/spec.json structure" "$(cat /tmp/docs-spec.json)"
 grep -q '"version"' /tmp/docs-spec.json && pass "GET /docs/spec.json version" || fail "GET /docs/spec.json version" "$(cat /tmp/docs-spec.json)"
 
-python3 -c "import json; spec=json.load(open('/tmp/docs-spec.json')); exit(0 if len(spec.get('endpoints',[]))==26 else 1)" \
-  && pass "GET /docs/spec.json endpoint count (26)" \
+python3 -c "import json; spec=json.load(open('/tmp/docs-spec.json')); exit(0 if len(spec.get('endpoints',[]))==27 else 1)" \
+  && pass "GET /docs/spec.json endpoint count (27)" \
   || fail "GET /docs/spec.json endpoint count" "$(python3 -c "import json; print(len(json.load(open('/tmp/docs-spec.json')).get('endpoints',[])))")"
 
 declare -a DOC_ROUTE_PATHS=(
@@ -114,6 +115,7 @@ declare -a DOC_ROUTE_PATHS=(
   '/user-accounts/me'
   '/user-accounts/me/profile-photo'
   '/admin/audit-summary'
+  '/admin/moderation-queue'
 )
 
 for route_path in "${DOC_ROUTE_PATHS[@]}"; do
@@ -572,9 +574,54 @@ expect_status "GET /user-accounts/me (JWT access -> 200)" 200 \
 expect_status "GET /admin/audit-summary (no auth -> 401)" 401 \
   "${api_url}/admin/audit-summary"
 
+expect_status "GET /admin/moderation-queue (no auth -> 401)" 401 \
+  "${api_url}/admin/moderation-queue"
+
 expect_status "GET /admin/audit-summary (no admin role -> 403)" 403 \
   -H "Authorization: Bearer ${access_token}" \
   "${api_url}/admin/audit-summary"
+
+expect_status "GET /admin/moderation-queue (no moderator role -> 403)" 403 \
+  -H "Authorization: Bearer ${access_token}" \
+  "${api_url}/admin/moderation-queue"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -c \
+  "INSERT INTO user_account_roles (user_account_id, city_id, role) VALUES ('${user_account_id}', '${city_id}', 'security_audit') ON CONFLICT DO NOTHING;" >/dev/null
+
+expect_status "POST /auth/login (security_audit user -> 200)" 200 \
+  -X POST "${api_url}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"email\":\"${user_email}\",\"password\":\"${user_password}\"}"
+
+audit_access_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['accessToken'])")"
+
+expect_status "GET /admin/audit-summary (security_audit -> 200)" 200 \
+  -H "Authorization: Bearer ${audit_access_token}" \
+  "${api_url}/admin/audit-summary"
+
+python3 -c "import json; b=json.load(open('/tmp/route-body.json')); exit(0 if b.get('status')=='ok' and 'totalEntries' in b else 1)" \
+  && pass "GET /admin/audit-summary body" \
+  || fail "GET /admin/audit-summary body" "$(cat /tmp/route-body.json)"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -c \
+  "INSERT INTO user_account_roles (user_account_id, city_id, role) VALUES ('${user_account_id}', '${city_id}', 'moderator') ON CONFLICT DO NOTHING;" >/dev/null
+
+expect_status "POST /auth/login (moderator user -> 200)" 200 \
+  -X POST "${api_url}/auth/login" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"email\":\"${user_email}\",\"password\":\"${user_password}\"}"
+
+moderator_access_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['accessToken'])")"
+
+expect_status "GET /admin/moderation-queue (moderator -> 200)" 200 \
+  -H "Authorization: Bearer ${moderator_access_token}" \
+  "${api_url}/admin/moderation-queue"
+
+python3 -c "import json; b=json.load(open('/tmp/route-body.json')); exit(0 if b.get('status')=='ok' and 'pendingReviewCount' in b else 1)" \
+  && pass "GET /admin/moderation-queue body" \
+  || fail "GET /admin/moderation-queue body" "$(cat /tmp/route-body.json)"
 
 expect_status "POST /auth/refresh (valid -> 200)" 200 \
   -X POST "${api_url}/auth/refresh" \
@@ -609,7 +656,13 @@ expect_status "GET /admin/audit-summary (city_admin -> 200)" 200 \
   -H "Authorization: Bearer ${admin_access_token}" \
   "${api_url}/admin/audit-summary"
 
-grep -q '"status":"ok"' /tmp/route-body.json && pass "GET /admin/audit-summary body" || fail "GET /admin/audit-summary body" "$(cat /tmp/route-body.json)"
+python3 -c "import json; b=json.load(open('/tmp/route-body.json')); exit(0 if b.get('status')=='ok' and 'totalEntries' in b else 1)" \
+  && pass "GET /admin/audit-summary city_admin body" \
+  || fail "GET /admin/audit-summary city_admin body" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /admin/moderation-queue (city_admin -> 200)" 200 \
+  -H "Authorization: Bearer ${admin_access_token}" \
+  "${api_url}/admin/moderation-queue"
 
 expect_status "GET /user-accounts/me (city mismatch header -> 403)" 403 \
   -H "Authorization: Bearer ${admin_access_token}" \

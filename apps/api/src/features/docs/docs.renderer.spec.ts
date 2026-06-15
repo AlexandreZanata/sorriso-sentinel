@@ -21,10 +21,10 @@ describe('DocsRenderer', () => {
     expect(html).toContain('docs-auth-token');
   });
 
-  it('should_return_spec_with_twenty_six_endpoints', () => {
+  it('should_return_spec_with_twenty_seven_endpoints', () => {
     const spec = renderer.getSpec('http://127.0.0.1:3010');
 
-    expect(spec.endpoints).toHaveLength(26);
+    expect(spec.endpoints).toHaveLength(27);
     expect(spec.baseUrl).toBe('http://127.0.0.1:3010');
   });
 

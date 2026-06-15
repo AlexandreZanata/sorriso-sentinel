@@ -55,6 +55,7 @@ export interface OccurrenceStorePort {
   ): Promise<void>;
   findById(id: string, cityId: string): Promise<StoredOccurrence | null>;
   listInBbox(cityId: string, filter: OccurrenceListFilter): Promise<OccurrenceListResult>;
+  countByStatus(cityId: string, status: OccurrenceStatus): Promise<number>;
 }
 
 export class InMemoryOccurrenceStore implements OccurrenceStorePort {
@@ -135,6 +136,16 @@ export class InMemoryOccurrenceStore implements OccurrenceStorePort {
         : undefined;
 
     return { items, nextCursor };
+  }
+
+  async countByStatus(
+    cityId: string,
+    status: OccurrenceStatus,
+  ): Promise<number> {
+    return [...this.records.values()].filter(
+      (occurrence) =>
+        occurrence.cityId === cityId && occurrence.status === status,
+    ).length;
   }
 }
 

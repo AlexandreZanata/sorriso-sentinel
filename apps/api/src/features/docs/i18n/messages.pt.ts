@@ -146,7 +146,10 @@ export const MESSAGES_PT: Record<string, string> = {
     'Exclusão lógica da conta e anonimização do e-mail. Retorna 204 com corpo vazio.',
   'endpoint.admin-audit-summary.summary': 'Resumo de auditoria admin',
   'endpoint.admin-audit-summary.description':
-    'Stub de resumo de auditoria. Exige role city_admin no JWT.',
+    'Métricas agregadas do log de auditoria do tenant. Exige role security_audit ou city_admin.',
+  'endpoint.admin-moderation-queue.summary': 'Resumo da fila de moderação',
+  'endpoint.admin-moderation-queue.description':
+    'Contagem de itens pendentes de revisão. Exige role moderator ou city_admin.',
   'seedGroup.tenant': 'Tenant e identificadores',
   'seedGroup.session': 'Bootstrap de sessão',
   'seedGroup.identity': 'Identidade e criptografia',

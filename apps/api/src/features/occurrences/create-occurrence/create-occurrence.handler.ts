@@ -9,6 +9,8 @@ import {
 import {
   InvalidOccurrenceCategoryError,
   Occurrence,
+  AUDIT_LOG_REPOSITORY,
+  type AuditLogRepositoryPort,
   type AuthorDisplayPolicy,
 } from '@sorriso-sentinel/domain';
 import { createOccurrenceSchema } from '@sorriso-sentinel/shared';
@@ -58,6 +60,8 @@ export class CreateOccurrenceHandler {
     private readonly eventPublisher: OccurrenceEventPublisherPort,
     @Inject(OCCURRENCE_ID_GENERATOR)
     private readonly occurrenceIds: OccurrenceIdGeneratorPort,
+    @Inject(AUDIT_LOG_REPOSITORY)
+    private readonly auditLog: AuditLogRepositoryPort,
   ) {}
 
   async execute(
@@ -124,6 +128,24 @@ export class CreateOccurrenceHandler {
 
     await this.occurrences.save(this.toStoredOccurrence(occurrence));
     await this.eventPublisher.publish(event);
+    await this.auditLog.append({
+      cityId: occurrence.cityId,
+      occurrenceId: occurrence.id,
+      action: 'occurrence_created',
+      actorType: 'contributor',
+      actorRef: session.reputationId,
+      beforeState: null,
+      afterState: {
+        id: occurrence.id,
+        category: occurrence.category,
+        status: 'unverified',
+        isSensitive: occurrence.isSensitive,
+        authorDisplayPolicy: occurrence.authorDisplayPolicy,
+        description: occurrence.description,
+        reputationId: occurrence.contributorRef.reputationId,
+      },
+      isSensitive: occurrence.isSensitive,
+    });
 
     return this.toResponse(occurrence, session);
   }

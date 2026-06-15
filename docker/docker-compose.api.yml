@@ -24,7 +24,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://sentinel:sentinel@postgres:5432/sorriso_sentinel
+      DATABASE_URL: postgresql://sentinel_app:sentinel_app@postgres:5432/sorriso_sentinel
       REDIS_URL: redis://redis:6379
       SESSION_TOKEN_SECRET: ${SESSION_TOKEN_SECRET:-dev-session-secret-change-me}
       S3_ENDPOINT: http://minio:9000
