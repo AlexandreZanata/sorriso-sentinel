@@ -13,8 +13,8 @@
   },
   "packageManager": "npm@11.14.1",
   "overrides": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "scripts": {
     "prepare": "husky",
@@ -42,7 +42,7 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "husky": "^9.1.7",
-    "markdownlint-cli2": "^0.17.0",
+    "markdownlint-cli2": "^0.22.1",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   }
