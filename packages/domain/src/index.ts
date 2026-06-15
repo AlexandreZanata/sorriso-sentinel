@@ -6,4 +6,7 @@ export * from './identity/value-objects/identity-mode.vo.js';
 export * from './identity/value-objects/pseudonym.vo.js';
 export * from './identity/value-objects/reputation-id.vo.js';
 export * from './identity/value-objects/local-key-reference.vo.js';
+export * from './identity/value-objects/author-display-policy.vo.js';
+export * from './identity/value-objects/sensitive-category.vo.js';
 export * from './identity/contributor-identity.entity.js';
+export * from './identity/services/sensitive-category-policy.js';
