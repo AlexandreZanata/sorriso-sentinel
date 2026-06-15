@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SESSION_TOKEN_ISSUER } from '../../infrastructure/auth/hmac-session-token.service';
 import { HmacSessionTokenService } from '../../infrastructure/auth/hmac-session-token.service';
+import { AuthModule } from '../auth/auth.module';
 import { BootstrapSessionController } from './bootstrap-session/bootstrap-session.controller';
 import { BootstrapSessionHandler } from './bootstrap-session/bootstrap-session.handler';
 import { ChangeIdentityModeController } from './change-identity-mode/change-identity-mode.controller';
@@ -13,6 +14,7 @@ const sessionSecret =
   process.env.SESSION_TOKEN_SECRET ?? 'dev-session-secret-change-me';
 
 @Module({
+  imports: [AuthModule],
   controllers: [
     BootstrapSessionController,
     ChangeIdentityModeController,
@@ -28,6 +30,6 @@ const sessionSecret =
       useValue: new HmacSessionTokenService(sessionSecret),
     },
   ],
-  exports: [SessionGuard, SESSION_TOKEN_ISSUER],
+  exports: [SessionGuard, SESSION_TOKEN_ISSUER, AuthModule],
 })
 export class IdentityModule {}

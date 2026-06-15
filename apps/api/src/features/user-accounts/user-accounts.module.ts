@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { IdentityModule } from '../identity/identity.module';
 import { GetMyAccountHandler } from './get-my-account/get-my-account.handler';
 import { RegisterUserAccountHandler } from './register-user-account/register-user-account.handler';
@@ -9,7 +10,7 @@ import { UserAccountsController } from './user-accounts.controller';
 import { VerifyEmailHandler } from './verify-email/verify-email.handler';
 
 @Module({
-  imports: [IdentityModule],
+  imports: [IdentityModule, AuthModule],
   controllers: [UserAccountsController],
   providers: [
     RegisterUserAccountHandler,

@@ -30,6 +30,7 @@ export * from './identity/value-objects/user-account-status.vo.js';
 export * from './identity/value-objects/device-binding-digest.vo.js';
 export * from './identity/value-objects/lgpd-consent.vo.js';
 export * from './identity/value-objects/pqc-public-key-ref.vo.js';
+export * from './identity/value-objects/password.vo.js';
 export * from './identity/ports/abuse-signal.port.js';
 export * from './identity/ports/pqc-crypto.port.js';
 export * from './identity/ports/user-account.repository.port.js';

@@ -28,8 +28,11 @@ const GROUP_KEYS: Record<string, string> = {
   Sessions: 'group.sessions',
   Occurrences: 'group.occurrences',
   Validation: 'group.validation',
+  Media: 'group.media',
   Identity: 'group.identity',
+  Auth: 'group.auth',
   'User accounts': 'group.userAccounts',
+  Admin: 'group.admin',
 };
 
 const SEED_GROUP_KEYS = ['tenant', 'session', 'identity', 'occurrence', 'flow'] as const;

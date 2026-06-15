@@ -1,5 +1,6 @@
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
+import * as authSchema from './schema/auth.js';
 import * as contributorsSchema from './schema/contributors.js';
 import * as occurrenceCommentsSchema from './schema/occurrence-comments.js';
 import * as occurrencesSchema from './schema/occurrences.js';
@@ -13,6 +14,7 @@ export const schema = {
   ...occurrenceCommentsSchema,
   ...validationVotesSchema,
   ...userAccountsSchema,
+  ...authSchema,
   ...mediaAssetsSchema,
 };
 
@@ -58,4 +60,5 @@ export { occurrences } from './schema/occurrences.js';
 export { occurrenceComments } from './schema/occurrence-comments.js';
 export { validationVotes } from './schema/validation-votes.js';
 export { userAccounts, emailVerificationTokens } from './schema/user-accounts.js';
+export { refreshTokens, userAccountRoles } from './schema/auth.js';
 export { mediaAssets } from './schema/media-assets.js';

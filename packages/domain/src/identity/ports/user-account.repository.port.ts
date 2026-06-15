@@ -14,6 +14,21 @@ export interface UserAccountRepositoryPort {
     cityId: string,
     contributorId: string,
   ): Promise<UserAccountProps | null>;
+  setPasswordHash(
+    cityId: string,
+    userAccountId: string,
+    passwordHash: string,
+  ): Promise<void>;
+  findPasswordHash(
+    cityId: string,
+    userAccountId: string,
+  ): Promise<string | null>;
+  listRoles(cityId: string, userAccountId: string): Promise<string[]>;
+  grantRole(
+    cityId: string,
+    userAccountId: string,
+    role: string,
+  ): Promise<void>;
   saveVerificationToken(
     userAccountId: string,
     record: EmailVerificationTokenRecord,

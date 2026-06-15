@@ -29,6 +29,7 @@ export const userAccounts = pgTable('user_accounts', {
     .default('private'),
   pqcPublicKeyRef: text('pqc_public_key_ref').notNull(),
   lgpdConsent: jsonb('lgpd_consent').notNull(),
+  passwordHash: text('password_hash'),
   version: integer('version').notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()

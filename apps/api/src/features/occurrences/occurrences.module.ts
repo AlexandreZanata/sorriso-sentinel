@@ -6,6 +6,8 @@ import { CreateOccurrenceController } from './create-occurrence/create-occurrenc
 import { CreateOccurrenceHandler } from './create-occurrence/create-occurrence.handler';
 import { GetOccurrenceController } from './get-occurrence/get-occurrence.controller';
 import { GetOccurrenceHandler } from './get-occurrence/get-occurrence.handler';
+import { ListCommentsController } from './list-comments/list-comments.controller';
+import { ListCommentsHandler } from './list-comments/list-comments.handler';
 import { ListOccurrencesController } from './list-occurrences/list-occurrences.controller';
 import { ListOccurrencesHandler } from './list-occurrences/list-occurrences.handler';
 
@@ -13,6 +15,7 @@ import { ListOccurrencesHandler } from './list-occurrences/list-occurrences.hand
   imports: [IdentityModule],
   controllers: [
     ListOccurrencesController,
+    ListCommentsController,
     CreateOccurrenceController,
     GetOccurrenceController,
     AddCommentController,
@@ -20,6 +23,7 @@ import { ListOccurrencesHandler } from './list-occurrences/list-occurrences.hand
   providers: [
     CreateOccurrenceHandler,
     ListOccurrencesHandler,
+    ListCommentsHandler,
     GetOccurrenceHandler,
     AddCommentHandler,
   ],

@@ -64,14 +64,18 @@ export const MESSAGES_PT: Record<string, string> = {
     'API da plataforma cívica de ocorrências. Rotas com escopo de tenant aplicam isolamento por cidade via token de sessão. Nomes de campos em inglês.',
   'auth.note.0': 'Rotas públicas não exigem Authorization.',
   'auth.note.1': 'Rotas de sessão exigem: Authorization: Bearer <sessionToken>',
-  'auth.note.2': 'Obtenha um token de sessão via POST /sessions/bootstrap.',
-  'auth.note.3': 'Tokens de sessão expiram em 24 horas (payload assinado com HMAC).',
+  'auth.note.2': 'Obtenha token via POST /sessions/bootstrap (HMAC, 24h) ou POST /auth/login (JWT, 15 min).',
+  'auth.note.3': 'Refresh tokens rotacionam em POST /auth/refresh; revogue via POST /auth/logout.',
+  'auth.note.4': 'Header x-city-id deve coincidir com city_id do token quando enviado (403 CITY_MISMATCH).',
   'group.health': 'Saúde',
   'group.sessions': 'Sessões',
   'group.occurrences': 'Ocorrências',
   'group.validation': 'Validação',
+  'group.media': 'Mídia',
   'group.identity': 'Identidade',
+  'group.auth': 'Autenticação',
   'group.userAccounts': 'Contas de usuário',
+  'group.admin': 'Admin',
   'endpoint.health.summary': 'Sonda de liveness',
   'endpoint.health.description': 'Retorna ok quando o processo está em execução.',
   'endpoint.health-live.summary': 'Liveness do processo',
@@ -90,6 +94,9 @@ export const MESSAGES_PT: Record<string, string> = {
   'endpoint.occurrences-get.summary': 'Obter detalhe da ocorrência',
   'endpoint.occurrences-get.description':
     'Retorna uma ocorrência com localização e autor conforme privacidade. Linhas sensíveis podem ser ocultadas por RLS.',
+  'endpoint.occurrences-list-comments.summary': 'Listar comentários',
+  'endpoint.occurrences-list-comments.description':
+    'Retorna comentários da ocorrência. Pseudônimo visível apenas ao autor do comentário.',
   'endpoint.occurrences-comment.summary': 'Adicionar comentário',
   'endpoint.occurrences-comment.description':
     'Adiciona um comentário da comunidade. Não altera a confiança da ocorrência (INV-V4).',
@@ -99,11 +106,29 @@ export const MESSAGES_PT: Record<string, string> = {
   'endpoint.occurrences-deny.summary': 'Negar ocorrência',
   'endpoint.occurrences-deny.description':
     'Registra voto de negação. Auto-validação em reports próprios é rejeitada (403).',
+  'endpoint.media-upload-slot.summary': 'Solicitar slot de upload',
+  'endpoint.media-upload-slot.description':
+    'Emite URL presigned PUT para JPEG. Apenas autor; rate limit por reputationId.',
+  'endpoint.media-complete-upload.summary': 'Completar upload de mídia',
+  'endpoint.media-complete-upload.description':
+    'Verifica upload no storage e remove EXIF inline quando MEDIA_PROCESS_INLINE=true.',
+  'endpoint.media-list.summary': 'Listar mídia da ocorrência',
+  'endpoint.media-list.description':
+    'Lista mídia pronta com URLs públicas. Chaves de quarentena nunca são expostas.',
   'endpoint.identity-mode.summary': 'Alterar modo de identidade',
   'endpoint.identity-mode.description': 'Alterna contribuidor entre modos ghost e pseudônimo.',
   'endpoint.identity-rotate.summary': 'Rotacionar chave local',
   'endpoint.identity-rotate.description':
     'Rotaciona digest de device binding após troca de chave local. Invalida sessões anteriores.',
+  'endpoint.auth-login.summary': 'Login com e-mail e senha',
+  'endpoint.auth-login.description':
+    'Retorna JWT de acesso (15 min) e refresh token revogável para contas ativas verificadas.',
+  'endpoint.auth-refresh.summary': 'Renovar access token',
+  'endpoint.auth-refresh.description':
+    'Rotaciona refresh token e emite novo JWT. O refresh anterior é revogado.',
+  'endpoint.auth-logout.summary': 'Logout',
+  'endpoint.auth-logout.description':
+    'Revoga família de refresh tokens. Access token permanece válido até expirar.',
   'endpoint.user-register.summary': 'Registrar conta',
   'endpoint.user-register.description':
     'Cria conta pendente com verificação de e-mail. Exige sessão + prova de dispositivo.',
@@ -119,6 +144,9 @@ export const MESSAGES_PT: Record<string, string> = {
   'endpoint.user-me-delete.summary': 'Solicitar exclusão LGPD',
   'endpoint.user-me-delete.description':
     'Exclusão lógica da conta e anonimização do e-mail. Retorna 204 com corpo vazio.',
+  'endpoint.admin-audit-summary.summary': 'Resumo de auditoria admin',
+  'endpoint.admin-audit-summary.description':
+    'Stub de resumo de auditoria. Exige role city_admin no JWT.',
   'seedGroup.tenant': 'Tenant e identificadores',
   'seedGroup.session': 'Bootstrap de sessão',
   'seedGroup.identity': 'Identidade e criptografia',
