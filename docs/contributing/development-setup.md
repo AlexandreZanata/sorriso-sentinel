@@ -68,14 +68,32 @@ git push -u origin feat/my-feature
 | Command | Description |
 |---------|-------------|
 | `make setup` | First-time install + hook setup |
-| `make check` | Branch guard + full validation (run before PR) |
-| `make validate` | CI parity: OSS files, VERSION, markdown lint |
-| `make lint` | Markdown lint only |
+| `make check` | Branch guard + validate + docker:validate |
+| `make validate` | CI parity: OSS, lint, test, typecheck, build |
+| `make lint` | Markdown + all workspace packages |
+| `make test` | Run all package tests (Vitest) |
+| `make build` | Build all apps and packages (Turborepo) |
+| `make dev` | Start dev servers (turbo) |
+| `make docker-up` | Start Postgres, Redis, MinIO |
+| `make docker-validate` | Full Docker health check (required before PR) |
 | `make fix` | Auto-fix markdown lint issues |
 | `npm run check` | Same as `make check` |
 | `npm run validate` | Same as `make validate` |
 
-When the application stack is defined, additional commands (`test`, `build`, etc.) will be added here and in CI.
+### Monorepo workspaces
+
+| Workspace | Command | Port |
+|-----------|---------|------|
+| API (NestJS) | `npm run dev -w @sorriso-sentinel/api` | 3000 |
+| Web (Next.js) | `npm run dev -w @sorriso-sentinel/web` | 3001 |
+| Worker | `npm run dev -w @sorriso-sentinel/worker` | — |
+| Mobile (Expo) | `npm run dev -w @sorriso-sentinel/mobile` | — |
+
+Production Next.js build (when React workspace isolation is resolved):
+
+```bash
+npm run build:next -w @sorriso-sentinel/web
+```
 
 ## Git hooks (automatic)
 

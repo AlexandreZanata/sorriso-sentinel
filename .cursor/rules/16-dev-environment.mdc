@@ -32,7 +32,9 @@ make check   # branch guard + CI parity validation
 |---------|---------|
 | `make setup` | Install deps + git hooks |
 | `make check` | Full validation before PR |
-| `make validate` | CI parity (oss, version, lint) |
-| `make lint` | Markdown lint |
+| `make validate` | CI parity (oss, lint, test, build) |
+| `make docker-up` | Start local infrastructure |
+
+See `docs/contributing/development-setup.md` for workspace dev commands.
 
 When stack is defined, extend with `test`, `build`, and integration commands.

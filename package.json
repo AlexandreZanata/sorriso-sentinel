@@ -4,25 +4,44 @@
   "private": true,
   "description": "Open source monitoring and sentinel platform",
   "license": "Apache-2.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19.4"
+  },
+  "packageManager": "npm@11.14.1",
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "scripts": {
     "prepare": "husky",
     "setup": "bash scripts/setup.sh",
-    "lint": "markdownlint-cli2 \"**/*.md\" \"#node_modules/**\"",
-    "lint:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules/**\"",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "npm run lint:root && turbo run lint",
+    "lint:root": "markdownlint-cli2",
+    "lint:fix": "markdownlint-cli2 --fix",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "validate:oss": "bash scripts/validate-oss.sh",
     "validate:version": "bash scripts/validate-version.sh",
     "validate:branch": "bash scripts/check-branch.sh",
-    "validate": "npm run validate:oss && npm run validate:version && npm run lint",
-    "check": "npm run validate:branch && npm run validate",
-    "commitlint": "commitlint --edit"
+    "validate": "npm run validate:oss && npm run validate:version && npm run lint:root && turbo run lint test typecheck build",
+    "check": "npm run validate:branch && npm run validate && npm run docker:validate",
+    "commitlint": "commitlint --edit",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d --wait",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:validate": "bash scripts/docker-validate.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "husky": "^9.1.7",
-    "markdownlint-cli2": "^0.17.0"
+    "markdownlint-cli2": "^0.17.0",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
   }
 }

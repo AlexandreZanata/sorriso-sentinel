@@ -37,6 +37,7 @@ cd sorriso-sentinel
 nvm use          # optional — matches .nvmrc (Node 20+)
 make setup       # install deps, git hooks, validate
 cp .env.example .env
+make docker-up   # optional — Postgres, Redis, MinIO
 ```
 
 Create a topic branch before making changes — see [development setup](docs/contributing/development-setup.md).

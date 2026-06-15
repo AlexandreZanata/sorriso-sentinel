@@ -19,6 +19,13 @@ All project documentation **must be written in English**.
 |-------|-------------|
 | [Governance](open-source/governance.md) | License, policies, branch protection, dependency rules |
 
+## Deployment
+
+| Guide | Description |
+|-------|-------------|
+| [Production](deployment/production.md) | Deploy checklist, architecture, rollback |
+| [Docker](deployment/docker.md) | Local infra, validation, pinned images |
+
 ## Architecture
 
 | Guide | Description |

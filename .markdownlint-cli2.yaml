@@ -1,6 +1,9 @@
 globs:
-  - "**/*.md"
-  - "!node_modules/**"
+  - "*.md"
+  - "docs/**/*.md"
+  - ".github/**/*.md"
+  - "apps/*/README.md"
+  - "packages/*/README.md"
 config:
   default: true
   MD013: false

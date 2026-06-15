@@ -1,0 +1,29 @@
+{
+  "name": "@sorriso-sentinel/web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "build:next": "next build",
+    "dev": "next dev --port 3001",
+    "start": "next start --port 3001",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@sorriso-sentinel/shared": "*",
+    "next": "^15.3.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@next/swc-linux-x64-gnu": "^15.3.3",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.1"
+  }
+}

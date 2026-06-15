@@ -91,8 +91,15 @@ GitHub Actions workflows (active):
 
 | Workflow | File | Trigger |
 |----------|------|---------|
-| CI | `.github/workflows/ci.yml` | Push/PR to `main` |
+| CI — monorepo | `.github/workflows/ci.yml` → job `validate` | Push/PR to `main` |
+| CI — Docker | `.github/workflows/ci.yml` → job `docker-validate` | Push/PR to `main` |
 | Release | `.github/workflows/release.yml` | Push tag `v*.*.*` |
+
+Local parity before PR:
+
+```bash
+make check    # validate + docker:validate
+```
 
 When the stack is chosen, uncomment lint/test/build steps in `ci.yml` and add stack-specific jobs.
 

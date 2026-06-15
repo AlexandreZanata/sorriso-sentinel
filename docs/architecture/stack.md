@@ -89,7 +89,7 @@ Never trust client-side stripping alone.
 
 | App | Stack | Package |
 |-----|-------|---------|
-| Mobile | React Native + Expo | `apps/mobile` |
+| Mobile | React Native + Expo SDK 54 | `apps/mobile` |
 | Web / map / admin | Next.js | `apps/web` |
 | Shared types + validation | TypeScript | `packages/domain`, `packages/shared` |
 

@@ -1,0 +1,60 @@
+---
+description: End every implementation response with a Conventional Commits suggestion in English
+alwaysApply: true
+---
+
+# Commit suggestion (mandatory)
+
+At the **end of every response** where you created, modified, or deleted project files, include a **Suggested commit** section in English.
+
+Skip only for pure Q&A with no file changes.
+
+## Format
+
+```markdown
+## Suggested commit
+
+**Branch:** `<type>/<short-description>`
+
+\`\`\`bash
+git add <paths-or-.>
+git commit -m "$(cat <<'EOF'
+<type>(<scope>): <imperative subject ≤72 chars>
+
+<optional body — why, not what>
+EOF
+)"
+\`\`\`
+```
+
+## Rules
+
+- Follow [docs/contributing/commits.md](../../docs/contributing/commits.md) and [docs/contributing/branches.md](../../docs/contributing/branches.md)
+- **English only** — subject imperative mood, ≤ 72 characters
+- **Branch** must match topic branch convention (`feat/`, `fix/`, `docs/`, `chore/`, etc.) — never `main`
+- **Type** must match change: `feat`, `fix`, `docs`, `chore`, `test`, `refactor`, `ci`, `build`
+- **Scope** = affected area (`domain`, `api`, `web`, `worker`, `database`, `docs`, `ci`)
+- One logical change per commit; list only relevant `git add` paths
+- Do not suggest commit if user did not ask and no files were changed
+
+## Examples
+
+**Docs only:**
+
+```text
+docs(system): add occurrence lifecycle and privacy principles
+```
+
+**Monorepo scaffold:**
+
+```text
+build(monorepo): scaffold turborepo with domain package and nestjs api
+```
+
+**Feature with body:**
+
+```text
+feat(occurrences): add Occurrence aggregate with status transitions
+
+Introduce domain entity and value objects per ADR-0003.
+```
