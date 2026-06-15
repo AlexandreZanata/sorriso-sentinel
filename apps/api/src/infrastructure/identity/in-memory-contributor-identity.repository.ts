@@ -45,4 +45,16 @@ export class InMemoryContributorIdentityRepository
     }
     return null;
   }
+
+  async findByReputationId(
+    reputationId: string,
+    cityId: string,
+  ): Promise<ContributorIdentity | null> {
+    for (const identity of this.byId.values()) {
+      if (identity.cityId === cityId && identity.reputationId === reputationId) {
+        return identity;
+      }
+    }
+    return null;
+  }
 }

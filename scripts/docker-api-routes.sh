@@ -156,6 +156,88 @@ python3 -c "import json; b=json.load(open('/tmp/route-body.json')); exit(0 if 'a
   && pass "POST /occurrences crime omits author" \
   || fail "POST /occurrences crime omits author" "$(cat /tmp/route-body.json)"
 
+expect_status "GET /occurrences (no session -> 401)" 401 \
+  "${api_url}/occurrences?minLatitude=-12.55&maxLatitude=-12.53&minLongitude=-55.73&maxLongitude=-55.71"
+
+expect_status "GET /occurrences (invalid bbox -> 400)" 400 \
+  "${api_url}/occurrences?minLatitude=-12.53&maxLatitude=-12.55&minLongitude=-55.73&maxLongitude=-55.71" \
+  -H "Authorization: Bearer ${token}"
+
+expect_status "GET /occurrences (valid bbox -> 200)" 200 \
+  "${api_url}/occurrences?minLatitude=-12.55&maxLatitude=-12.53&minLongitude=-55.73&maxLongitude=-55.71" \
+  -H "Authorization: Bearer ${token}"
+
+python3 -c "import json; ids=[item['id'] for item in json.load(open('/tmp/route-body.json')).get('items',[])]; exit(0 if '${occurrence_id}' in ids else 1)" \
+  && pass "GET /occurrences includes created id" \
+  || fail "GET /occurrences includes created id" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /occurrences/:id (valid -> 200)" 200 \
+  "${api_url}/occurrences/${occurrence_id}" \
+  -H "Authorization: Bearer ${token}"
+
+grep -q '"privacyLevel":"public"' /tmp/route-body.json && pass "GET /occurrences/:id privacyLevel" || fail "GET /occurrences/:id privacyLevel" "$(cat /tmp/route-body.json)"
+grep -q '"location":{' /tmp/route-body.json && pass "GET /occurrences/:id location present" || fail "GET /occurrences/:id location" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /occurrences/:id (missing -> 404)" 404 \
+  "${api_url}/occurrences/01932f1a-0000-7000-8000-000000009999" \
+  -H "Authorization: Bearer ${token}"
+
+echo ""
+echo "--- Media upload ---"
+fixture="${root}/scripts/fixtures/test-100x100.jpg"
+fixture_size="$(wc -c < "${fixture}" | tr -d ' ')"
+
+expect_status "POST /occurrences/:id/media/upload-slots (no session -> 401)" 401 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/media/upload-slots" \
+  -H 'Content-Type: application/json' \
+  -d "{\"contentType\":\"image/jpeg\",\"contentLength\":${fixture_size}}"
+
+expect_status "POST /occurrences/:id/media/upload-slots (valid -> 201)" 201 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/media/upload-slots" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d "{\"contentType\":\"image/jpeg\",\"contentLength\":${fixture_size}}"
+
+media_slot_id="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['slotId'])")"
+media_upload_url="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['uploadUrl'])")"
+grep -q '"uploadUrl":' /tmp/route-body.json && pass "POST upload-slots returns uploadUrl" || fail "POST upload-slots uploadUrl"
+
+media_raw_key="$(docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT raw_storage_key FROM media_assets WHERE id = '${media_slot_id}';" | tr -d '[:space:]')"
+
+[[ -n "${media_raw_key}" ]] && pass "POST upload-slots persisted media_assets row" \
+  || fail "POST upload-slots persisted media_assets row"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" cp "${fixture}" api:/tmp/test-100x100.jpg
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T api \
+  wget -q -O /dev/null --method=PUT \
+  --header="Content-Type: image/jpeg" \
+  --body-file=/tmp/test-100x100.jpg \
+  "${media_upload_url}" \
+  && pass "PUT image to presigned MinIO URL" \
+  || fail "PUT image to presigned MinIO URL"
+
+expect_status "POST /media/upload-slots/:id/complete (valid -> 202)" 202 \
+  -X POST "${api_url}/media/upload-slots/${media_slot_id}/complete" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d "{\"uploadedKey\":\"${media_raw_key}\"}"
+
+grep -q '"status":"ready"' /tmp/route-body.json && pass "POST complete inline processing ready" \
+  || grep -q '"status":"processing"' /tmp/route-body.json && pass "POST complete returns processing" \
+  || fail "POST complete status" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /occurrences/:id/media (ready -> 200)" 200 \
+  "${api_url}/occurrences/${occurrence_id}/media" \
+  -H "Authorization: Bearer ${token}"
+
+python3 -c "import json; items=json.load(open('/tmp/route-body.json')).get('items',[]); exit(0 if len(items)>=1 and items[0]['id']=='${media_slot_id}' else 1)" \
+  && pass "GET /occurrences/:id/media lists ready item" \
+  || fail "GET /occurrences/:id/media lists ready item" "$(cat /tmp/route-body.json)"
+
+grep -q 'quarantine' /tmp/route-body.json && fail "GET media exposes quarantine key" "$(cat /tmp/route-body.json)" || pass "GET media hides quarantine keys"
+
 echo ""
 echo "--- Identity ---"
 expect_status "PATCH /identity/mode (no session -> 401)" 401 \

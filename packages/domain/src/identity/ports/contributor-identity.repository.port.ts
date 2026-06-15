@@ -11,6 +11,10 @@ export interface ContributorIdentityRepositoryPort {
     pseudonym: string,
     cityId: string,
   ): Promise<ContributorIdentity | null>;
+  findByReputationId(
+    reputationId: string,
+    cityId: string,
+  ): Promise<ContributorIdentity | null>;
 }
 
 export const CONTRIBUTOR_IDENTITY_REPOSITORY = Symbol(

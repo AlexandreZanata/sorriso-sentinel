@@ -1,14 +1,48 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { AuthorDisplayPolicy, OccurrenceStatus } from '@sorriso-sentinel/domain';
 import { occurrences, withCityContext } from '@sorriso-sentinel/database';
-import { and, eq } from 'drizzle-orm';
+import { encodeOccurrenceCursor } from '@sorriso-sentinel/shared';
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  isNull,
+  lt,
+  lte,
+  ne,
+  or,
+} from 'drizzle-orm';
 import type pg from 'pg';
 import {
   OccurrenceUpdateConflictError,
+  type OccurrenceListFilter,
+  type OccurrenceListResult,
   type OccurrenceStorePort,
   type StoredOccurrence,
 } from '../occurrences/in-memory-occurrence.store';
 import { DATABASE_POOL } from './database.tokens';
+
+function rowToStored(row: typeof occurrences.$inferSelect): StoredOccurrence {
+  return {
+    id: row.id,
+    cityId: row.cityId,
+    category: row.category,
+    occurrenceKind: row.occurrenceKind,
+    status: row.status as OccurrenceStatus,
+    confidenceLevel: row.confidenceLevel,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    privacyLevel: row.privacyLevel,
+    description: row.description ?? undefined,
+    reputationId: row.contributorReputationId,
+    authorDisplayPolicy: row.authorDisplayPolicy as AuthorDisplayPolicy,
+    isSensitive: row.isSensitive,
+    version: row.version,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 @Injectable()
 export class DrizzleOccurrenceStore implements OccurrenceStorePort {
@@ -75,7 +109,7 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
       const rows = await db
         .select()
         .from(occurrences)
-        .where(eq(occurrences.id, id))
+        .where(and(eq(occurrences.id, id), isNull(occurrences.deletedAt)))
         .limit(1);
       const row = rows[0];
 
@@ -83,24 +117,59 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         return null;
       }
 
-      return {
-        id: row.id,
-        cityId: row.cityId,
-        category: row.category,
-        occurrenceKind: row.occurrenceKind,
-        status: row.status as OccurrenceStatus,
-        confidenceLevel: row.confidenceLevel,
-        latitude: row.latitude,
-        longitude: row.longitude,
-        privacyLevel: row.privacyLevel,
-        description: row.description ?? undefined,
-        reputationId: row.contributorReputationId,
-        authorDisplayPolicy: row.authorDisplayPolicy as AuthorDisplayPolicy,
-        isSensitive: row.isSensitive,
-        version: row.version,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
+      return rowToStored(row);
+    });
+  }
+
+  async listInBbox(
+    cityId: string,
+    filter: OccurrenceListFilter,
+  ): Promise<OccurrenceListResult> {
+    return withCityContext(this.pool, cityId, async (db) => {
+      const conditions = [
+        isNull(occurrences.deletedAt),
+        ne(occurrences.privacyLevel, 'hidden'),
+        gte(occurrences.latitude, filter.minLatitude),
+        lte(occurrences.latitude, filter.maxLatitude),
+        gte(occurrences.longitude, filter.minLongitude),
+        lte(occurrences.longitude, filter.maxLongitude),
+      ];
+
+      if (filter.status) {
+        conditions.push(eq(occurrences.status, filter.status));
+      }
+
+      if (filter.category) {
+        conditions.push(eq(occurrences.category, filter.category));
+      }
+
+      if (filter.cursor) {
+        conditions.push(
+          or(
+            lt(occurrences.createdAt, filter.cursor.createdAt),
+            and(
+              eq(occurrences.createdAt, filter.cursor.createdAt),
+              lt(occurrences.id, filter.cursor.id),
+            ),
+          )!,
+        );
+      }
+
+      const rows = await db
+        .select()
+        .from(occurrences)
+        .where(and(...conditions))
+        .orderBy(desc(occurrences.createdAt), desc(occurrences.id))
+        .limit(filter.limit + 1);
+
+      const items = rows.slice(0, filter.limit).map(rowToStored);
+      const last = items.at(-1);
+      const nextCursor =
+        rows.length > filter.limit && last
+          ? encodeOccurrenceCursor(last.createdAt, last.id)
+          : undefined;
+
+      return { items, nextCursor };
     });
   }
 }

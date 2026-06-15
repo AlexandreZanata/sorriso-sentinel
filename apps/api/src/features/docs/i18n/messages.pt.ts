@@ -84,6 +84,12 @@ export const MESSAGES_PT: Record<string, string> = {
   'endpoint.occurrences-create.summary': 'Criar ocorrência',
   'endpoint.occurrences-create.description':
     'Cria uma ocorrência não verificada. Limite: 10/hora por reputationId. Categorias sensíveis forçam exibição ghost.',
+  'endpoint.occurrences-list.summary': 'Listar ocorrências no bbox',
+  'endpoint.occurrences-list.description':
+    'Retorna feed do mapa para uma caixa delimitadora. Exclui privacy hidden. Span máximo de 0,5 graus por eixo.',
+  'endpoint.occurrences-get.summary': 'Obter detalhe da ocorrência',
+  'endpoint.occurrences-get.description':
+    'Retorna uma ocorrência com localização e autor conforme privacidade. Linhas sensíveis podem ser ocultadas por RLS.',
   'endpoint.occurrences-comment.summary': 'Adicionar comentário',
   'endpoint.occurrences-comment.description':
     'Adiciona um comentário da comunidade. Não altera a confiança da ocorrência (INV-V4).',

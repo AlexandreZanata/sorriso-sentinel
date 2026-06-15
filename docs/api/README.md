@@ -9,7 +9,7 @@ Interactive reference for all public HTTP routes, served by the NestJS API.
 
 ## Source of truth
 
-- **Spec & examples:** `packages/shared/src/api-docs/` — `getApiDocumentationSpec(baseUrl)` builds the full catalog (16 endpoints).
+- **Spec & examples:** `packages/shared/src/api-docs/` — `getApiDocumentationSpec(baseUrl)` builds the full catalog (18 endpoints).
 - **HTML renderer:** `apps/api/src/features/docs/` — server-side UI without a separate frontend build.
 
 Example values mirror the live system: city UUID `01932f1a-0000-7000-8000-000000000001`, reputation IDs `Rep-XXXXX`, session bootstrap flow, validation votes, user account fields, etc.
