@@ -14,6 +14,9 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "==> Removing stale sentinel containers (fixed container_name conflicts)"
+docker rm -f sentinel-postgres sentinel-redis sentinel-minio sentinel-api 2>/dev/null || true
+
 echo "==> Validating compose files: ${compose_base} + ${compose_api}"
 docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" config --quiet
 

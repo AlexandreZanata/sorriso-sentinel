@@ -21,6 +21,7 @@
     "@sorriso-sentinel/domain": "*",
     "@sorriso-sentinel/shared": "*",
     "bcryptjs": "^3.0.3",
+    "helmet": "^8.2.0",
     "ioredis": "^5.11.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

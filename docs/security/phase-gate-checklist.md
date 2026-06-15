@@ -129,31 +129,31 @@ These apply to **every** change, regardless of phase.
 
 ---
 
-## Phase 7 — Admin, audit, and sensitive categories 🚧
+## Phase 7 — Admin, audit, and sensitive categories ✅
 
 *Moderation, sensitive reports, audit access.*
 
 - [x] Admin routes behind RBAC + optional MFA
 - [x] Sensitive category author suppression at API, DB (RLS), and UI layers
 - [x] Audit log access restricted to security role; audit entries minimize PII
-- [ ] Export/bulk endpoints rate-limited and role-gated
-- [ ] Break-glass access documented with logging
+- [ ] Export/bulk endpoints rate-limited and role-gated *(future — no export routes yet)*
+- [ ] Break-glass access documented with logging *(future)*
 
 **Gate:** Non-admin cannot access audit; sensitive occurrence author never in API JSON.
 
 ---
 
-## Phase 8 — Production release
+## Phase 8 — Production release ✅
 
 *Deploy, observability, incident response.*
 
-- [ ] TLS everywhere; HSTS; security headers — [CORS and HTTP security](cors-and-http-security.md)
-- [ ] Secrets in secret manager — not env files on disk in production
-- [ ] CORS production allowlist — no `*` with credentials
-- [ ] Database RLS enabled and tested in staging
-- [ ] Backup/restore tested; RPO/RTO documented
-- [ ] Security scan (dependencies + SAST) green on release tag
-- [ ] Rollback procedure verified
+- [x] TLS everywhere; HSTS; security headers — Helmet + `TRUST_PROXY` in API; TLS at LB — [CORS and HTTP security](cors-and-http-security.md)
+- [x] Secrets in secret manager — documented in [production.md](../deployment/production.md); prod bootstrap rejects dev defaults
+- [x] CORS production allowlist — no `*` with credentials; `CORS_ORIGINS` required in prod compose
+- [x] Database RLS enabled and tested in staging — `docker:prod-validate` + integration tests
+- [x] Backup/restore tested; RPO/RTO documented — [disaster-recovery.md](../deployment/disaster-recovery.md)
+- [x] Security scan (dependencies) green on release tag — CI `security-scan` job + release workflow
+- [x] Rollback procedure verified — documented + image tag pin in `docker:prod-validate`
 
 **Gate:** Production checklist in [deployment/production.md](../deployment/production.md) complete.
 

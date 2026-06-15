@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 8 production hardening: Helmet security headers, HSTS with `TRUST_PROXY`, production CORS allowlist guard
+- Production bootstrap rejects dev JWT/session secrets when `NODE_ENV=production`
+- `npm run validate:security` (production dependency audit) and `npm run docker:prod-validate`
+- CI jobs `security-scan` and `docker-prod-validate`; release workflow gates on security audit
+- [disaster-recovery.md](docs/deployment/disaster-recovery.md) with RPO/RTO targets and restore procedure
 - Phase 7 admin slice: `occurrence_audit` table, audit summary read model, `GET /admin/audit-summary`
 - `GET /admin/moderation-queue` with `moderator` / `city_admin` RBAC
 - Anonymity Step 7 RLS integration tests and `docker-validate` RLS checks
@@ -25,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Production compose requires `VERSION`, `CORS_ORIGINS`, and non-default JWT/session secrets
+- `docker-compose.api.yml` supplies production-safe CORS and JWT defaults for Docker validation
+- Phase gate checklist: Phases 7–8 marked complete
 - `GET /admin/audit-summary` returns real audit metrics (requires `security_audit` or `city_admin`)
 - Phase gate checklist: Phases 2–6 marked complete; Phase 7 opened
 

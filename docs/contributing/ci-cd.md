@@ -10,7 +10,7 @@ Pipeline configuration and all CI-related documentation **must be written in Eng
 | Unit tests | Domain and application logic | Yes |
 | Integration tests | Repos, adapters, DB (Test Containers) | Yes |
 | Build | Compile/bundle artifacts | Yes |
-| Security scan | Dependencies, SAST (when configured) | Yes (critical) |
+| Security scan | Dependencies (`npm audit --omit=dev`) | Yes (high/critical) |
 
 ## Branch strategy
 
@@ -93,12 +93,14 @@ GitHub Actions workflows (active):
 |----------|------|---------|
 | CI — monorepo | `.github/workflows/ci.yml` → job `validate` | Push/PR to `main` |
 | CI — Docker | `.github/workflows/ci.yml` → job `docker-validate` | Push/PR to `main` |
-| Release | `.github/workflows/release.yml` | Push tag `v*.*.*` |
+| CI — Docker prod | `.github/workflows/ci.yml` → job `docker-prod-validate` | Push/PR to `main` |
+| CI — Security | `.github/workflows/ci.yml` → job `security-scan` | Push/PR to `main` |
+| Release | `.github/workflows/release.yml` | Push tag `v*.*.*` (after security-scan) |
 
 Local parity before PR:
 
 ```bash
-make check    # validate + docker:validate
+make check    # validate + security audit + docker:validate + docker:prod-validate
 ```
 
 When the stack is chosen, uncomment lint/test/build steps in `ci.yml` and add stack-specific jobs.
