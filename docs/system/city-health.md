@@ -60,5 +60,7 @@ Sorriso General Index: 68
 
 ## Related docs
 
+- [City health feature module](../features/city-health/README.md) — scoring, k-anonymity, APIs, TDD
 - [Territorial intelligence](territorial-intelligence.md) — trends and predictions
+- [Territorial memory feature module](../features/territorial-memory/README.md)
 - [Occurrence lifecycle](occurrence-lifecycle.md)

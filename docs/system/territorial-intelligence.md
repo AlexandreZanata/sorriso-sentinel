@@ -120,6 +120,7 @@ Rural segments are first-class `Place` entities with PostGIS geometry (LineStrin
 
 ## Related docs
 
+- [Territorial memory feature module](../features/territorial-memory/README.md) — indexing, trends, missions, TDD
 - [Occurrence lifecycle](occurrence-lifecycle.md)
 - [City health](city-health.md)
 - [Technology stack](../architecture/stack.md)

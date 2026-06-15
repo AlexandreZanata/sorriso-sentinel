@@ -32,6 +32,8 @@ Security enforcement for privacy rules: [security docs](../security/README.md).
 | [Community validation](../features/community-validation/README.md) | Confirm, deny, comment, consensus |
 | [Reputation](../features/reputation/README.md) | Invisible trust score, weights, public labels |
 | [Media upload](../features/media-upload/README.md) | Photo evidence, EXIF strip, upload limits |
+| [Territorial memory](../features/territorial-memory/README.md) | Place history, trends, timeline, missions |
+| [City health](../features/city-health/README.md) | Neighborhood scores, city index |
 
 ## Design references
 

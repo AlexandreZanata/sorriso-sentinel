@@ -78,9 +78,9 @@ Test names use behavior style: `should_reject_ghost_identity_when_displaying_sen
 | [Occurrence creation](occurrence-creation/README.md) | Occurrences | Spec complete |
 | [Community validation](community-validation/README.md) | Validation | Spec complete |
 | [Reputation](reputation/README.md) | Identity & Reputation | Spec complete |
-| Territorial memory | Territorial Intelligence | Planned |
+| [Territorial memory](territorial-memory/README.md) | Territorial Intelligence | Spec complete |
 | [Media upload](media-upload/README.md) | Media | Spec complete |
-| City health | City Health & Analytics | Planned |
+| [City health](city-health/README.md) | City Health & Analytics | Spec complete |
 
 ## Related docs
 
