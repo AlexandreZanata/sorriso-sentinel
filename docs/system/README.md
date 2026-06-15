@@ -22,6 +22,13 @@ Security enforcement for privacy rules: [security docs](../security/README.md).
 | [Technology stack](../architecture/stack.md) | Backend, data, clients, infrastructure |
 | [Monorepo structure](../architecture/monorepo-structure.md) | Planned folder layout (Turborepo) |
 
+## Feature specifications
+
+| Module | Description |
+|--------|-------------|
+| [Feature modules index](../features/README.md) | How DDD + TDD specs work per capability |
+| [Anonymity](../features/anonymity/README.md) | Identity modes, permissions, domain model |
+
 ## Design references
 
 The system is inspired by the intersection of **Wikipedia** (collective knowledge), **Waze** (real-time community input), and **Signal** (privacy by default).

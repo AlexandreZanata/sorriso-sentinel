@@ -4,6 +4,8 @@ Anonymity is the **default**. Identity is **optional**. If this is wrong, nobody
 
 Design reference: **Wikipedia + Waze + Signal**.
 
+> **Implementation detail:** See the [Anonymity feature module](../features/anonymity/README.md) for permissions matrix, flows, domain model, and TDD plan.
+
 ## Three layers
 
 ```text
@@ -172,6 +174,7 @@ No OAuth-only access — external providers are optional, not the sole path.
 
 ## Related docs
 
+- [Anonymity feature module](../features/anonymity/README.md) — detailed business rules and TDD
 - [Reputation and trust](reputation-and-trust.md)
 - [Occurrence lifecycle](occurrence-lifecycle.md)
 - [Technology stack](../architecture/stack.md)

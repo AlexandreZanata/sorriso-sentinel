@@ -46,6 +46,7 @@ All project documentation **must be written in English**.
 | Guide | Description |
 |-------|-------------|
 | [System docs](system/README.md) | Domain model, lifecycle, privacy, intelligence |
+| [Feature modules](features/README.md) | **Per-feature business rules, flows, DDD, and TDD plans** |
 
 ## Language policy
 
