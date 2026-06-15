@@ -89,10 +89,10 @@ See [input validation and XSS](input-validation-and-xss.md).
 
 ## Checklist
 
-- [ ] Production `CORS_ORIGINS` documented and reviewed per deploy
-- [ ] No `origin: true` (reflect any origin) in production
-- [ ] Security headers verified with securityheaders.com or CI probe
-- [ ] TLS 1.2+ only; HTTP redirects to HTTPS
+- [x] Production `CORS_ORIGINS` documented and reviewed per deploy
+- [x] No `origin: true` (reflect any origin) in production
+- [x] Security headers verified with CI probe (`docker:prod-validate`)
+- [ ] TLS 1.2+ only; HTTP redirects to HTTPS *(load balancer / CDN — operator)*
 
 ## Related docs
 

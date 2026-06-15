@@ -1,9 +1,17 @@
 # Production overlay — use with:
 # docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#
+# Required env: VERSION, POSTGRES_PASSWORD, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD,
+# DATABASE_URL (sentinel_app runtime role), REDIS_URL, CORS_ORIGINS,
+# JWT_ACCESS_SECRET, SESSION_TOKEN_SECRET
 
 services:
   postgres:
     ports: !reset []
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./postgres/ssl:/var/lib/postgresql/ssl:ro
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
     command:
@@ -20,6 +28,10 @@ services:
       - max_connections=200
       - -c
       - ssl=on
+      - -c
+      - ssl_cert_file=/var/lib/postgresql/ssl/server.crt
+      - -c
+      - ssl_key_file=/var/lib/postgresql/ssl/server.key
     deploy:
       resources:
         limits:
@@ -54,13 +66,22 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.api
-    image: sorriso-sentinel/api:${VERSION:-latest}
+    image: sorriso-sentinel/api:${VERSION:?VERSION required}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3000
+      TRUST_PROXY: ${TRUST_PROXY:-true}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL required}
       REDIS_URL: ${REDIS_URL:?REDIS_URL required}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS required}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET required}
+      SESSION_TOKEN_SECRET: ${SESSION_TOKEN_SECRET:?SESSION_TOKEN_SECRET required}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-${MINIO_ROOT_USER}}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-${MINIO_ROOT_PASSWORD}}
+      S3_BUCKET: ${S3_BUCKET:-sorriso-sentinel-media}
+      S3_REGION: ${S3_REGION:-us-east-1}
     ports:
       - '127.0.0.1:3000:3000'
     depends_on:

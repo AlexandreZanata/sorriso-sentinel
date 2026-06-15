@@ -80,6 +80,25 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v23
         continue-on-error: true
 
+  security-scan:
+    name: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm run validate:security
+
   docker:
     name: docker-validate
     runs-on: ubuntu-latest
@@ -89,3 +108,13 @@ jobs:
 
       - name: Validate Docker infrastructure
         run: bash scripts/docker-validate.sh
+
+  docker-prod:
+    name: docker-prod-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate production Docker overlay
+        run: bash scripts/docker-prod-validate.sh

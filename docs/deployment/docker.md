@@ -38,6 +38,7 @@ make docker-up
 ```bash
 make docker-validate
 # or: npm run docker:validate
+npm run docker:prod-validate   # Phase 8 — production overlay, headers, CORS, RLS staging
 ```
 
 This script:
