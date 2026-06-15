@@ -1,0 +1,48 @@
+---
+description: Clean architecture, SOLID, hexagonal, Vertical Slice, and DDD
+alwaysApply: true
+---
+
+# Architecture
+
+## SOLID
+
+- **SRP**: one reason to change per module/class
+- **OCP**: extend without editing existing code
+- **LSP**: substitutable implementations
+- **ISP**: small, cohesive interfaces
+- **DIP**: domain depends on abstractions, not infrastructure
+
+## Layers (dependency points inward)
+
+`Presentation → Infrastructure → Application → Domain`
+
+Domain **must not import** anything from outside.
+
+## Hexagonal
+
+Every external integration (DB, queue, email, third-party API) goes through a port/interface in Application/Domain. Concrete implementation = adapter in Infrastructure.
+
+## Vertical Slice
+
+Organize by feature/domain:
+
+```
+features/orders/create-order/
+```
+
+Never by generic technical type mixing domains (`controllers/`, `services/`, global `repositories/`).
+
+# DDD
+
+- **Entities** (identity), **Value Objects** (immutable, invariants in constructor)
+- **Aggregates** (root ensures transactional consistency)
+- **Domain Services**, **Domain Events**
+- **Ubiquitous Language**: business names (`StockMovement`, `PurchaseOrder`); forbid generics (`DataManager`, `Helper`, `Util`)
+- **Bounded Contexts**: modules per context (`Inventory`, `Sales`); communication via DTOs/events
+
+# External integrations
+
+Always: port/interface + adapter + integration or contract test.
+
+Endpoints must include: authentication/RBAC, rate limiting (if public), input validation, logging with correlation id, consistent error handling.

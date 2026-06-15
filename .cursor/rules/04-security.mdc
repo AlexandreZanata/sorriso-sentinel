@@ -1,0 +1,15 @@
+---
+description: Security, RBAC/ABAC, and OWASP
+alwaysApply: true
+---
+
+# Security
+
+- **RBAC** (minimum) / **ABAC** (when needed); **Least Privilege** always
+- Passwords: strong hashing (Argon2/bcrypt)
+- **JWT** short-lived + rotation; **refresh tokens** separate and revocable
+- **MFA** on sensitive accounts
+- **Rate limiting** on public endpoints and authentication
+- Mandatory protections: **CSRF**, **XSS**, **SQL Injection** (parameterized queries/ORM)
+- Cover **OWASP Top 10** in sensitive reviews
+- **Never** log sensitive data (passwords, tokens, PII)

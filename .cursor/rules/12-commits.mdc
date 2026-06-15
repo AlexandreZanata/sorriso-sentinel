@@ -1,0 +1,39 @@
+---
+description: Commit message conventions and git safety
+alwaysApply: true
+---
+
+# Commits
+
+Full guide: `docs/contributing/commits.md`
+
+## Format (Conventional Commits, English)
+
+```
+<type>(<scope>): <short summary>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types**: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`, `build`
+
+## Rules
+
+- Subject ≤ 72 characters; imperative mood; English only
+- One logical change per commit
+- Never commit secrets (`.env`, credentials, keys)
+- Never skip hooks (`--no-verify`) unless user explicitly requests
+- Never amend pushed commits unless user explicitly requests
+- Only create commits when the user asks
+
+## Examples
+
+```
+feat(orders): add idempotent order creation endpoint
+
+fix(auth): reject expired refresh tokens on rotation
+
+test(inventory): cover insufficient stock rejection
+```

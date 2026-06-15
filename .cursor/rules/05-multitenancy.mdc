@@ -1,0 +1,13 @@
+---
+description: Tenant isolation and row-level security
+alwaysApply: true
+---
+
+# Multitenancy (when applicable)
+
+- **Tenant isolation** everywhere: DB, cache, logs, queues — never mix data across tenants
+- **Tenant context** (`tenant_id`) propagated on every request, job, and event
+- **Row Level Security** in the database as an extra defense layer
+- Cache and logs **tenant-aware**
+
+If the project is not multi-tenant, skip tenant isolation but keep least privilege and per-resource access validation.

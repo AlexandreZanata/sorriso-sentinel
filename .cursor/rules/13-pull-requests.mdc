@@ -1,0 +1,38 @@
+---
+description: Pull request conventions and review requirements
+alwaysApply: true
+---
+
+# Pull requests
+
+Full guide: `docs/contributing/pull-requests.md`
+
+## PR title
+
+Conventional Commits format, English: `feat(scope): short description`
+
+## PR body template
+
+```markdown
+## Summary
+- <1-3 bullet points>
+
+## Test plan
+- [ ] <verification step>
+```
+
+## Before opening a PR
+
+- Branch up to date with base branch
+- All CI checks pass locally (lint, unit, integration, build)
+- No secrets or generated artifacts that should be gitignored
+- Tests included for new/changed behavior (TDD)
+- ADR linked if architecture decision was made
+
+## Review focus
+
+- Security (OWASP, auth, input validation)
+- Query count per route (N+1)
+- Complexity and file size limits
+- Tenant isolation (if applicable)
+- English-only code and comments

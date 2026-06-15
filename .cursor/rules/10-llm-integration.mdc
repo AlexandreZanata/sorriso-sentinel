@@ -1,0 +1,13 @@
+---
+description: Best practices for AI/LLM integrations in the system
+globs: **/*{llm,rag,prompt,ai,embedding,vector}*
+alwaysApply: false
+---
+
+# AI / LLM (when the system integrates AI)
+
+- **RAG**: fetch relevant context before sending to the model
+- **AI cost control**: never send full tables/datasets without need
+- **Context compression** for long context
+- **Prompt versioning** as code (versioned, reviewable)
+- **Human in the loop** for critical or irreversible actions

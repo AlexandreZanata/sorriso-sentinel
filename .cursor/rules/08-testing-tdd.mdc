@@ -1,0 +1,31 @@
+---
+description: Mandatory TDD — Red, Green, Refactor, and test pyramid
+alwaysApply: true
+---
+
+# Mandatory TDD
+
+**Red → Green → Refactor** flow for all domain and application logic:
+
+1. Write test for expected behavior (must fail)
+2. Minimal code to pass
+3. Refactor while green, applying SOLID/DDD
+
+## Test pyramid
+
+| Layer | Scope |
+|-------|-------|
+| Unit | Domain/use cases; no real I/O; mocks via DIP |
+| Integration | Repos/adapters; prefer Test Containers |
+| Contract | Between services/modules |
+| E2E | Critical business flows |
+| Mutation | Validate suite quality periodically |
+
+## Conventions
+
+- Name by behavior: `should_reject_order_when_stock_is_insufficient`
+- Tests independent of each other
+- No `sleep` or arbitrary waits
+- Coverage is a consequence of good tests, not an isolated goal
+
+Disposable spikes: explicitly warn they do not follow TDD.

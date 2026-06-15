@@ -1,0 +1,38 @@
+---
+description: All code, comments, and technical artifacts must be in English
+alwaysApply: true
+---
+
+# English-only output (mandatory)
+
+**Regardless of the user's input language (including Portuguese), all project artifacts must be written in English.**
+
+## Applies to
+
+- Source code (variables, functions, classes, types, enums)
+- Comments and docstrings
+- Test names and descriptions
+- Commit messages and PR titles/descriptions
+- Documentation (`docs/`, README, ADRs)
+- Error messages exposed to developers/operators
+- Log message keys and structured log field names
+- API route paths, query params, and JSON field names
+- Database table/column names and migration descriptions
+- Configuration keys and environment variable names
+
+## Rules
+
+- User may write prompts in any language; agent output in code/docs **must be English**.
+- Domain terms use English Ubiquitous Language (`PurchaseOrder`, not `PedidoCompra`).
+- User-facing product copy (UI strings for end users) may be localized separately via i18n — default locale files still use English keys.
+- Do not mix languages in the same file.
+
+## Examples
+
+```typescript
+// BAD — Portuguese in code
+function calcularTotalPedido(itens: Item[]) { /* soma os valores */ }
+
+// GOOD — English only
+function calculateOrderTotal(items: OrderItem[]) { /* sums line amounts */ }
+```

@@ -1,0 +1,32 @@
+---
+description: Semantic versioning, changelog, and open source release policy
+alwaysApply: true
+---
+
+# Versioning and open source
+
+Full guides: `docs/contributing/versioning.md`, `docs/open-source/governance.md`
+
+## SemVer
+
+- Format: `MAJOR.MINOR.PATCH` — see [VERSION](VERSION)
+- Update `CHANGELOG.md` under `[Unreleased]` for every user-facing change
+- Release tags: `v0.1.0` must match `VERSION` file
+
+## Open source requirements
+
+- License: **Apache 2.0** — all contributions licensed the same
+- Required root files must not be removed: `LICENSE`, `NOTICE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `CHANGELOG.md`, `VERSION`
+- No proprietary or secret dependencies required to build/run
+- No secrets in code, commits, or issues
+
+## Release workflow
+
+1. Move `[Unreleased]` items to a versioned section in `CHANGELOG.md` with date
+2. Bump `VERSION`
+3. Commit: `chore(release): vX.Y.Z`
+4. Tag `vX.Y.Z` and push — release workflow creates GitHub Release
+
+## Dependency licenses
+
+When adding dependencies: prefer OSI-approved licenses (MIT, Apache 2.0, BSD). Flag GPL/copyleft for maintainer review via ADR.

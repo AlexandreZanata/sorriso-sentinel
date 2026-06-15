@@ -1,0 +1,31 @@
+---
+description: Persistence, migrations, audit trail, and query limits per route
+alwaysApply: true
+---
+
+# Database
+
+## Mandatory patterns
+
+- **Soft delete**: `deleted_at`; never hard-delete business records
+- **Audit trail**: `before/after/user/timestamp` on relevant changes
+- **Optimistic locking**: `version` or `updated_at` on critical updates
+- **Idempotency**: critical commands support re-execution without duplicate effects
+- **DB constraints**: `UNIQUE`, `CHECK`, `FOREIGN KEY` — do not rely on application only
+- Reversible migrations or documented rollback
+- Indexes on frequent filter/join columns (especially `tenant_id`)
+
+## Query limit per route (anti N+1)
+
+| Queries | Action |
+|---------|--------|
+| 1–3 | Ideal (prefer 1 via joins/aggregations) |
+| 4–5 | Review design |
+| >5 | **Alert**: likely N+1, missing eager loading, or logic that belongs in batch/job |
+
+- **Forbidden**: loops that fire a query per iteration
+- **Resolve with**: `WHERE id IN (...)`, joins, dataloader, projection
+- New query on high-frequency route: matching index + cost estimate (`EXPLAIN ANALYZE` when possible)
+- Reports, exports, heavy aggregations: **background job**, never synchronous route
+
+When writing DB code, consider soft delete, audit trail, optimistic locking, constraints, and route query count.

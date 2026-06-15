@@ -1,0 +1,13 @@
+---
+description: Scalability, CQRS, async jobs, and event-driven patterns
+alwaysApply: true
+---
+
+# Scalability
+
+- **Stateless backend**: no local in-process memory state
+- **Cache first** (e.g. Redis) with clear invalidation
+- **CQRS** when read and write have very different needs
+- **Background jobs** for heavy, slow, or retriable operations
+- **Event driven** + **Outbox Pattern** (avoid dual-write)
+- **Saga Pattern** for distributed transactions

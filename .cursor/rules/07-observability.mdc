@@ -1,0 +1,12 @@
+---
+description: Structured logging, tracing, metrics, and health checks
+alwaysApply: true
+---
+
+# Observability
+
+- **Structured logging** (JSON): level, timestamp, tenant/user/request id
+- **Correlation ID** propagated across the chain, including async and jobs
+- **Distributed tracing** when multiple services exist
+- **Metrics**: latency, errors, throughput
+- **Health checks**: `/health`, `/ready`, `/live`

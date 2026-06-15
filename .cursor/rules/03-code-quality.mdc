@@ -1,0 +1,36 @@
+---
+description: Complexity limits, file size, and anti king files
+alwaysApply: true
+---
+
+# Complexity and size
+
+| Metric | Limit |
+|--------|-------|
+| Cyclomatic complexity | max 10 (ideal ≤ 5) |
+| Lines per function | ≤ 30–40 |
+| if/loop nesting | max 3 levels |
+| Lines per file | ≤ 300–400 |
+
+Above limits: extract sub-functions, Strategy/Polymorphism, early return/guard clauses.
+
+Configure project linter to fail above these limits when supported (ESLint complexity, SonarQube, Radon, etc.).
+
+# Anti king files
+
+**Forbidden** "god" files that everything depends on:
+
+- Giant `utils`/`helpers` used by all domains
+- Route file with hundreds of endpoints
+- Monolithic config mixing domains
+
+## Warning signs
+
+- File > 400 lines → split by responsibility/feature
+- High fan-in (imported by dozens of modules across domains) → split by bounded context
+
+## Legitimate shared code
+
+Base types, VO primitives, infra clients: small, stable, well tested. Changes require broad suite covering all consumers.
+
+Config/env/constants: separate per domain/module, not a single global file.

@@ -1,0 +1,17 @@
+---
+description: CI/CD, feature flags, IaC, and disaster recovery
+alwaysApply: true
+---
+
+# DevOps / CI/CD
+
+See `docs/contributing/ci-cd.md` for full pipeline requirements.
+
+- **CI/CD**: lint + tests (unit + integration) + build on every PR
+- Automated deploy from protected branches only
+- **Feature flags** for gradual rollout and rollback without deploy
+- **Blue-green / canary** on critical releases
+- **Infrastructure as Code**; **Docker** for reproducible dev and production
+- **Backup strategy** and **disaster recovery** documented and tested
+
+Pipeline must fail on: lint errors, test failures, build failures, security scan critical findings.

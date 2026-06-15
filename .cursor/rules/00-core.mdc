@@ -1,0 +1,52 @@
+---
+description: Core principles, project context, and agent workflow
+alwaysApply: true
+---
+
+# Context — Sorriso Sentinel
+
+- **Stack**: define at project start (language, framework, ORM)
+- **Type**: define (e.g. API, multi-tenant SaaS, modular monolith)
+- **Database**: define (e.g. PostgreSQL)
+- **Ubiquitous Language**: English for domain terms; keep consistent across code, tests, and docs
+
+Update this section when the stack is defined.
+
+# General principles
+
+- Assume growth: multiple teams, tenants, and production under load.
+- Never choose the fastest path if it compromises security, maintainability, or traceability.
+- Never remove tests, validations, logs, or security checks without explicit warning.
+- Always explain trade-offs when more than one valid approach exists.
+- Relevant architecture decisions: suggest an ADR in `docs/adr/`.
+
+# Agent workflow (mandatory order)
+
+New features follow this sequence:
+
+1. Define slice/feature (Vertical Slice)
+2. Define entities, VOs, domain events
+3. Write test for expected behavior (Red)
+4. Implement minimal code (Green)
+5. Refactor while keeping tests green
+
+Before finishing any function/file, verify:
+
+- Cyclomatic complexity ≤ 10 (ideal ≤ 5)
+- Function ≤ 30–40 lines; file ≤ 300–400 lines
+- File has not become a "king file" (excessive fan-in across domains)
+- Query count per route (see database rule)
+
+# Enterprise delivery checklist
+
+- [ ] Clean Architecture + DDD + Vertical Slice
+- [ ] Native multitenancy (if applicable) + RBAC/ABAC
+- [ ] Audit trail + soft delete + optimistic locking + DB constraints
+- [ ] Max ~3 queries/route (alert above 5); no N+1
+- [ ] Complexity and size within limits; no king files
+- [ ] CQRS + Outbox + background jobs (when justified)
+- [ ] Structured logging + correlation IDs + health checks
+- [ ] Feature flags + Docker + CI/CD
+- [ ] TDD: unit, integration, e2e for domain/application logic
+
+Never generate production code without a corresponding test, except explicitly disposable spikes (warn that TDD is not followed).
