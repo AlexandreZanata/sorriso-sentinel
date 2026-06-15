@@ -79,7 +79,7 @@ Test names use behavior style: `should_reject_ghost_identity_when_displaying_sen
 | [Community validation](community-validation/README.md) | Validation | Spec complete |
 | [Reputation](reputation/README.md) | Identity & Reputation | Spec complete |
 | Territorial memory | Territorial Intelligence | Planned |
-| Media upload | Media | Planned |
+| [Media upload](media-upload/README.md) | Media | Spec complete |
 | City health | City Health & Analytics | Planned |
 
 ## Related docs

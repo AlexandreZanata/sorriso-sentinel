@@ -101,6 +101,7 @@ Never serve the raw upload to other users before step 5 completes.
 
 ## Related docs
 
+- [Media upload feature module](../features/media-upload/README.md) — limits, EXIF pipeline, TDD
 - [IDOR and access control](idor-and-access-control.md)
 - [Security chain failures](security-chain-failures.md)
 - [Phase gate — Phase 5](phase-gate-checklist.md#phase-5--media-upload)

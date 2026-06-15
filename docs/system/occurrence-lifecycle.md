@@ -59,7 +59,7 @@ Other contributors can:
 |--------|--------|
 | **Confirm** | Increases confidence |
 | **Deny** | Decreases confidence |
-| **Add photos** | Evidence (anonymized before storage) |
+| **Add photos** | Evidence (anonymized before storage) — [media upload module](../features/media-upload/README.md) |
 | **Comment** | Context (anti-doxxing filters applied) |
 
 **Never trust a single person** — consensus required. See Principle 9 in [privacy and identity](privacy-and-identity.md).

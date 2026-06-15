@@ -31,6 +31,7 @@ Security enforcement for privacy rules: [security docs](../security/README.md).
 | [Occurrence creation](../features/occurrence-creation/README.md) | Create report — write path, invariants, TDD |
 | [Community validation](../features/community-validation/README.md) | Confirm, deny, comment, consensus |
 | [Reputation](../features/reputation/README.md) | Invisible trust score, weights, public labels |
+| [Media upload](../features/media-upload/README.md) | Photo evidence, EXIF strip, upload limits |
 
 ## Design references
 

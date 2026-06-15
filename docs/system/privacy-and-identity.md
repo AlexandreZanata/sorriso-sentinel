@@ -82,6 +82,8 @@ Every uploaded photo passes through a **server-side worker** before persistence:
 
 Client-side stripping is **not trusted** — always re-process in worker.
 
+> **Implementation detail:** [Media upload feature module](../features/media-upload/README.md)
+
 ### Principle 7 — Sensitive report mode
 
 Categories: corruption, crime, trafficking, violence.

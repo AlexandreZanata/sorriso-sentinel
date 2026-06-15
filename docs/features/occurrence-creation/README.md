@@ -41,7 +41,7 @@ Anonymity ──▶ ContributorRef, AuthorDisplayPolicy, session
      └──▶ Occurrence Creation (this module)
               │
               ├──▶ Validation (future — confirm/deny)  [community-validation](../community-validation/README.md)
-              ├──▶ Media (future — attach photos)
+              ├──▶ Media (attach photos)  [media-upload](../media-upload/README.md)
               └──▶ Territorial Intelligence (reads OccurrenceCreated)
 ```
 

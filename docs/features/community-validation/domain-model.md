@@ -302,7 +302,7 @@ packages/domain/src/occurrences/
 | Occurrence creation | Occurrence must exist in `unverified` or later state |
 | Anonymity | `ContributorRef`, `ContentPolicyPort`, sensitive display |
 | Reputation | `ReputationPort` — see [reputation module](../reputation/README.md) |
-| Media (future) | Evidence does not replace votes; may boost weight v2 |
+| Media (future) | Evidence does not replace votes; may boost weight v2 — [media upload](../media-upload/README.md) |
 
 ---
 
