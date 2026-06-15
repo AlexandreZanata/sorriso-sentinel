@@ -10,6 +10,7 @@ api_url="${API_URL:-http://127.0.0.1:3010}"
 city_id="01932f1a-0000-7000-8000-000000000001"
 session_secret="${SESSION_TOKEN_SECRET:-dev-session-secret-change-me}"
 local_key_ref="fingerprint-docker-routes-$(date +%s)"
+pseudonym="RtUser$(printf '%x' "${RANDOM}")"
 passed=0
 failed=0
 
@@ -156,7 +157,7 @@ expect_status "PATCH /identity/mode (pseudonym -> 200)" 200 \
   -X PATCH "${api_url}/identity/mode" \
   -H "Authorization: Bearer ${token}" \
   -H 'Content-Type: application/json' \
-  -d '{"mode":"pseudonym","pseudonym":"RotaTeste"}'
+  -d "{\"mode\":\"pseudonym\",\"pseudonym\":\"${pseudonym}\"}"
 
 token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['sessionToken'])")"
 grep -q '"identityMode":"pseudonym"' /tmp/route-body.json && pass "PATCH /identity/mode body" || fail "PATCH /identity/mode body" "$(cat /tmp/route-body.json)"
