@@ -19,7 +19,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Verify open source files
+        run: |
+          set -euo pipefail
+          required_files=(
+            LICENSE
+            NOTICE
+            README.md
+            CONTRIBUTING.md
+            CODE_OF_CONDUCT.md
+            SECURITY.md
+            CHANGELOG.md
+            VERSION
+          )
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "All required open source files present."
+
+      - name: Verify VERSION format
+        run: |
+          set -euo pipefail
+          version=$(tr -d '[:space:]' < VERSION)
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid VERSION format: $version (expected SemVer)"
+            exit 1
+          fi
+          echo "VERSION=$version"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -45,12 +76,16 @@ jobs:
           fi
           echo "Tag matches VERSION."
 
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v23
+        continue-on-error: true
+
   docker:
     name: docker-validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate Docker infrastructure
         run: bash scripts/docker-validate.sh
