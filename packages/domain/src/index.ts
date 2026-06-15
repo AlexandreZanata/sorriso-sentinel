@@ -2,3 +2,8 @@ export * from './occurrences/occurrence.entity.js';
 export * from './occurrences/occurrence-status.vo.js';
 export * from './occurrences/occurrence-created.event.js';
 export * from './occurrences/occurrence.repository.port.js';
+export * from './identity/value-objects/identity-mode.vo.js';
+export * from './identity/value-objects/pseudonym.vo.js';
+export * from './identity/value-objects/reputation-id.vo.js';
+export * from './identity/value-objects/local-key-reference.vo.js';
+export * from './identity/contributor-identity.entity.js';
