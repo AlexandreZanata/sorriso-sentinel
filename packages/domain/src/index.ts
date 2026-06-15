@@ -10,3 +10,6 @@ export * from './identity/value-objects/author-display-policy.vo.js';
 export * from './identity/value-objects/sensitive-category.vo.js';
 export * from './identity/contributor-identity.entity.js';
 export * from './identity/services/sensitive-category-policy.js';
+export * from './identity/services/doxxing-patterns.js';
+export * from './identity/services/content-policy.service.js';
+export * from './identity/ports/content-policy.port.js';
