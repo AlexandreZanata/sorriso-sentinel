@@ -2,7 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SessionClaims } from '../../../infrastructure/auth/hmac-session-token.service';
 import type { OccurrenceIdGeneratorPort } from '../../../infrastructure/database/occurrence-id-generator.port';
-import type { OccurrenceEventPublisherPort } from '../../../infrastructure/occurrences/occurrence-event.publisher';
+import type { OccurrenceEventPublisherPort } from '../../../infrastructure/occurrences/occurrence-event-publisher.port';
 import type {
   OccurrenceStorePort,
   StoredOccurrence,

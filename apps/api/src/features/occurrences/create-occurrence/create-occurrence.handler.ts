@@ -20,7 +20,7 @@ import {
 import {
   OCCURRENCE_EVENT_PUBLISHER,
   type OccurrenceEventPublisherPort,
-} from '../../../infrastructure/occurrences/occurrence-event.publisher';
+} from '../../../infrastructure/occurrences/occurrence-event-publisher.port';
 import type { RateLimiterPort } from '../../../infrastructure/redis/rate-limiter.port';
 import { REDIS_RATE_LIMITER } from '../../../infrastructure/redis/redis.tokens';
 import {
