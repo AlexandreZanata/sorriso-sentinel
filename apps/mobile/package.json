@@ -14,7 +14,7 @@
   "dependencies": {
     "@sorriso-sentinel/shared": "*",
     "expo": "~54.0.35",
-    "expo-status-bar": "~3.0.9",
+    "expo-status-bar": "~56.0.4",
     "react": "19.1.0",
     "react-native": "0.81.6"
   },
