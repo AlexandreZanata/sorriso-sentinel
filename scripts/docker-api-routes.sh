@@ -215,6 +215,103 @@ docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T 
   || fail "POST /comments persisted in Postgres"
 
 echo ""
+echo "--- Validation (confirm/deny) ---"
+voter_local_key_ref="${local_key_ref}-voter"
+expect_status "POST /occurrences/:id/confirm (no session -> 401)" 401 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/confirm" \
+  -H 'Content-Type: application/json' \
+  -d '{"version":1}'
+
+expect_status "POST /sessions/bootstrap (voter session -> 201)" 201 \
+  -X POST "${api_url}/sessions/bootstrap" \
+  -H 'Content-Type: application/json' \
+  -d "{\"cityId\":\"${city_id}\",\"localKeyRef\":\"${voter_local_key_ref}\"}"
+
+voter_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['sessionToken'])")"
+
+expect_status "POST /occurrences/:id/confirm (valid -> 200)" 200 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/confirm" \
+  -H "Authorization: Bearer ${voter_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"version":1,"reason":"verified_locally"}'
+
+grep -q '"confidenceLevel":20' /tmp/route-body.json && pass "POST /confirm increased confidence" || fail "POST /confirm confidence" "$(cat /tmp/route-body.json)"
+grep -q '"status":"under_review"' /tmp/route-body.json && pass "POST /confirm status under_review" || fail "POST /confirm status" "$(cat /tmp/route-body.json)"
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT COUNT(*) FROM validation_votes WHERE occurrence_id = '${occurrence_id}';" \
+  | grep -q 1 \
+  && pass "POST /confirm persisted validation vote" \
+  || fail "POST /confirm persisted validation vote"
+
+expect_status "POST /occurrences/:id/confirm (duplicate vote -> 403)" 403 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/confirm" \
+  -H "Authorization: Bearer ${voter_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"version":2}'
+
+expect_status "POST /occurrences/:id/deny (self-validation -> 403)" 403 \
+  -X POST "${api_url}/occurrences/${occurrence_id}/deny" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"version":2,"reason":"false_alarm"}'
+
+echo ""
+echo "--- User accounts ---"
+pqc_ref="$(printf 'a%.0s' {1..64})"
+pqc_signature="$(python3 -c "import base64; print(base64.urlsafe_b64encode(b'valid-dev-signature').decode())")"
+user_email="docker.user.${RANDOM}@example.com"
+
+expect_status "POST /user-accounts/register (no session -> 401)" 401 \
+  -X POST "${api_url}/user-accounts/register" \
+  -H 'Content-Type: application/json' \
+  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
+
+expect_status "POST /user-accounts/register (valid -> 201)" 201 \
+  -X POST "${api_url}/user-accounts/register" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d "{\"email\":\"${user_email}\",\"displayName\":\"Docker User\",\"deviceNonce\":\"nonce-docker-001\",\"pqcPublicKeyRef\":\"${pqc_ref}\",\"pqcSignature\":\"${pqc_signature}\",\"lgpdConsent\":{\"termsVersion\":\"1.0.0\",\"privacyVersion\":\"1.0.0\",\"consentedAt\":\"2026-06-15T12:00:00.000Z\",\"purposes\":[\"account_creation\",\"email_communication\"]}}"
+
+user_account_id="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['userAccountId'])")"
+verification_token="$(python3 -c "import json; print(json.load(open('/tmp/route-body.json'))['verificationToken'])")"
+grep -q '"status":"pending_verification"' /tmp/route-body.json && pass "POST /register pending_verification" || fail "POST /register status" "$(cat /tmp/route-body.json)"
+
+expect_status "POST /user-accounts/verify-email (valid -> 200)" 200 \
+  -X POST "${api_url}/user-accounts/verify-email" \
+  -H 'Content-Type: application/json' \
+  -d "{\"userAccountId\":\"${user_account_id}\",\"cityId\":\"${city_id}\",\"token\":\"${verification_token}\"}"
+
+grep -q '"status":"active"' /tmp/route-body.json && pass "POST /verify-email active" || fail "POST /verify-email status" "$(cat /tmp/route-body.json)"
+
+expect_status "GET /user-accounts/me (no session -> 401)" 401 \
+  "${api_url}/user-accounts/me"
+
+expect_status "GET /user-accounts/me (valid -> 200)" 200 \
+  -H "Authorization: Bearer ${token}" \
+  "${api_url}/user-accounts/me"
+
+grep -q '"trustedSourceLabel":"new_source"' /tmp/route-body.json && pass "GET /me reputation label" || fail "GET /me reputation" "$(cat /tmp/route-body.json)"
+grep -q 'docker.user' /tmp/route-body.json && pass "GET /me email present" || fail "GET /me email" "$(cat /tmp/route-body.json)"
+
+expect_status "PATCH /user-accounts/me (update profile -> 200)" 200 \
+  -X PATCH "${api_url}/user-accounts/me" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"displayName":"Docker Civic User","showIdentityOnReports":true}'
+
+grep -q '"showIdentityOnReports":true' /tmp/route-body.json && pass "PATCH /me showIdentityOnReports" || fail "PATCH /me body" "$(cat /tmp/route-body.json)"
+
+expect_status "PATCH /user-accounts/me/profile-photo (valid -> 200)" 200 \
+  -X PATCH "${api_url}/user-accounts/me/profile-photo" \
+  -H "Authorization: Bearer ${token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"storageKey":"profiles/docker-user.jpg","visibility":"public"}'
+
+grep -q '"visibility":"public"' /tmp/route-body.json && pass "PATCH /me/profile-photo visibility" || fail "PATCH /me/profile-photo" "$(cat /tmp/route-body.json)"
+
+echo ""
 echo "==> Summary: ${passed} passed, ${failed} failed"
 
 if [[ "${failed}" -gt 0 ]]; then

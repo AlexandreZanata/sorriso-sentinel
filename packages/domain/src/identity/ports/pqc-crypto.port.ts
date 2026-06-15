@@ -6,6 +6,8 @@ export interface PqcCryptoPort {
   }): Promise<boolean>;
 }
 
+export const PQC_CRYPTO_PORT = Symbol('PQC_CRYPTO_PORT');
+
 export interface DeviceRegistrationProof {
   contributorId: string;
   cityId: string;

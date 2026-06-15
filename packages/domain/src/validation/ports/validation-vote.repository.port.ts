@@ -7,3 +7,5 @@ export interface ValidationVoteRepositoryPort {
     cityId: string,
   ): Promise<ValidationVoteProps[]>;
 }
+
+export const VALIDATION_VOTE_REPOSITORY = Symbol('VALIDATION_VOTE_REPOSITORY');

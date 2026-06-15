@@ -24,6 +24,11 @@ import {
 import { UserAccountCreatedEvent } from './events/user-account-created.event.js';
 import { EmailVerifiedEvent } from './events/email-verified.event.js';
 import { UserAccountErasureRequestedEvent } from './events/user-account-erasure-requested.event.js';
+import {
+  DEFAULT_PROFILE_PHOTO_VISIBILITY,
+  parseProfilePhotoVisibility,
+  type ProfilePhotoVisibility,
+} from './value-objects/profile-photo-visibility.vo.js';
 
 export interface UserAccountProps {
   id: string;
@@ -34,6 +39,8 @@ export interface UserAccountProps {
   status: UserAccountStatus;
   emailVerificationState: EmailVerificationState;
   showIdentityOnReports: boolean;
+  profilePhotoStorageKey: string | null;
+  profilePhotoVisibility: ProfilePhotoVisibility;
   pqcPublicKeyRef: string;
   lgpdConsent: LgpdConsentProps;
   version: number;
@@ -98,6 +105,8 @@ export class UserAccount {
       status: DEFAULT_USER_ACCOUNT_STATUS,
       emailVerificationState: DEFAULT_EMAIL_VERIFICATION_STATE,
       showIdentityOnReports: false,
+      profilePhotoStorageKey: null,
+      profilePhotoVisibility: DEFAULT_PROFILE_PHOTO_VISIBILITY,
       pqcPublicKeyRef: parsePqcPublicKeyRef(params.deviceProof.publicKeyRef),
       lgpdConsent: parseLgpdConsent(params.lgpdConsent),
       version: 1,
@@ -134,6 +143,10 @@ export class UserAccount {
       ),
       pqcPublicKeyRef: parsePqcPublicKeyRef(props.pqcPublicKeyRef),
       lgpdConsent: rehydrateLgpdConsent(props.lgpdConsent),
+      profilePhotoStorageKey: props.profilePhotoStorageKey,
+      profilePhotoVisibility: parseProfilePhotoVisibility(
+        props.profilePhotoVisibility,
+      ),
     });
   }
 
@@ -167,6 +180,14 @@ export class UserAccount {
 
   get showIdentityOnReports(): boolean {
     return this.props.showIdentityOnReports;
+  }
+
+  get profilePhotoStorageKey(): string | null {
+    return this.props.profilePhotoStorageKey;
+  }
+
+  get profilePhotoVisibility(): ProfilePhotoVisibility {
+    return this.props.profilePhotoVisibility;
   }
 
   get pqcPublicKeyRef(): string {
@@ -238,6 +259,67 @@ export class UserAccount {
     this.props.updatedAt = clock();
   }
 
+  updateProfile(params: {
+    displayName?: string;
+    showIdentityOnReports?: boolean;
+    clock: () => Date;
+  }): void {
+    if (this.props.status === 'deleted') {
+      throw new InvalidUserAccountStateError('Account has been deleted');
+    }
+
+    if (params.displayName !== undefined) {
+      this.props.displayName = parseDisplayName(params.displayName);
+    }
+
+    if (params.showIdentityOnReports !== undefined) {
+      this.props.showIdentityOnReports = params.showIdentityOnReports;
+    }
+
+    this.props.version += 1;
+    this.props.updatedAt = params.clock();
+  }
+
+  updateProfilePhoto(params: {
+    storageKey: string;
+    visibility?: ProfilePhotoVisibility | string;
+    clock: () => Date;
+  }): void {
+    if (this.props.status === 'deleted') {
+      throw new InvalidUserAccountStateError('Account has been deleted');
+    }
+
+    const storageKey = params.storageKey.trim();
+
+    if (!storageKey) {
+      throw new Error('Profile photo storage key is required');
+    }
+
+    this.props.profilePhotoStorageKey = storageKey;
+
+    if (params.visibility !== undefined) {
+      this.props.profilePhotoVisibility = parseProfilePhotoVisibility(
+        params.visibility,
+      );
+    }
+
+    this.props.version += 1;
+    this.props.updatedAt = params.clock();
+  }
+
+  updateProfilePhotoVisibility(
+    visibility: ProfilePhotoVisibility | string,
+    clock: () => Date,
+  ): void {
+    if (this.props.status === 'deleted') {
+      throw new InvalidUserAccountStateError('Account has been deleted');
+    }
+
+    this.props.profilePhotoVisibility = parseProfilePhotoVisibility(visibility);
+    this.props.version += 1;
+    this.props.updatedAt = clock();
+  }
+
   revokeConsent(clock: () => Date): void {
     if (this.props.status === 'deleted') {
       throw new InvalidUserAccountStateError('Account has been deleted');
@@ -260,6 +342,8 @@ export class UserAccount {
     this.props.status = 'deleted';
     this.props.emailVerificationState = 'expired';
     this.props.showIdentityOnReports = false;
+    this.props.profilePhotoStorageKey = null;
+    this.props.profilePhotoVisibility = DEFAULT_PROFILE_PHOTO_VISIBILITY;
     this.props.deletedAt = requestedAt;
     this.props.version += 1;
     this.props.updatedAt = requestedAt;
@@ -281,6 +365,8 @@ export class UserAccount {
       status: this.props.status,
       emailVerificationState: this.props.emailVerificationState,
       showIdentityOnReports: this.props.showIdentityOnReports,
+      profilePhotoVisibility: this.props.profilePhotoVisibility,
+      hasProfilePhoto: this.props.profilePhotoStorageKey !== null,
       lgpdConsent: this.props.lgpdConsent,
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),

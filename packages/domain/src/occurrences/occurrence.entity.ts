@@ -24,6 +24,14 @@ import {
 import { parseProblemLocation, type ProblemLocation } from './value-objects/problem-location.vo.js';
 import { parseContributorRef } from '../identity/value-objects/contributor-ref.vo.js';
 import { LocationPrivacyService } from './services/location-privacy.service.js';
+import { ConfidenceCalculator } from '../validation/services/confidence-calculator.js';
+import { StatusTransitionService } from '../validation/services/status-transition.service.js';
+import type { ValidationPolicy } from '../validation/value-objects/validation-policy.vo.js';
+import type { ValidationVote } from '../validation/validation-vote.entity.js';
+import type { ValidationVoteStats } from '../validation/services/validation-vote-stats.service.js';
+import { OccurrenceConfirmedEvent } from '../validation/events/occurrence-confirmed.event.js';
+import { OccurrenceDeniedEvent } from '../validation/events/occurrence-denied.event.js';
+import { OccurrenceConfidenceChangedEvent } from '../validation/events/occurrence-confidence-changed.event.js';
 
 export interface OccurrenceProps {
   id: string;
@@ -66,8 +74,40 @@ export interface CreateNewOccurrenceResult {
   event: OccurrenceCreatedEvent;
 }
 
+export class OccurrenceValidationClosedError extends Error {
+  constructor() {
+    super('Occurrence is not open for validation');
+    this.name = 'OccurrenceValidationClosedError';
+  }
+}
+
+export class OccurrenceVersionMismatchError extends Error {
+  constructor() {
+    super('Occurrence version mismatch');
+    this.name = 'OccurrenceVersionMismatchError';
+  }
+}
+
+export interface RecordValidationVoteParams {
+  vote: ValidationVote;
+  voteStats: ValidationVoteStats;
+  policy: ValidationPolicy;
+  expectedVersion: number;
+  clock: () => Date;
+}
+
+export type OccurrenceValidationEvent =
+  | OccurrenceConfirmedEvent
+  | OccurrenceDeniedEvent
+  | OccurrenceConfidenceChangedEvent;
+
+export interface OccurrenceValidationResult {
+  occurrence: Occurrence;
+  events: OccurrenceValidationEvent[];
+}
+
 export class Occurrence {
-  private constructor(private readonly props: OccurrenceProps) {}
+  private constructor(private props: OccurrenceProps) {}
 
   static create(props: OccurrenceProps): Occurrence {
     if (props.confidenceLevel < 0 || props.confidenceLevel > 100) {
@@ -75,6 +115,10 @@ export class Occurrence {
     }
 
     return new Occurrence(props);
+  }
+
+  static rehydrate(props: OccurrenceProps): Occurrence {
+    return Occurrence.create(props);
   }
 
   static createNew(params: CreateNewOccurrenceParams): CreateNewOccurrenceResult {
@@ -211,5 +255,110 @@ export class Occurrence {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  recordConfirmation(
+    params: RecordValidationVoteParams,
+  ): OccurrenceValidationResult {
+    if (params.vote.voteType !== 'confirm') {
+      throw new Error('Expected confirm vote');
+    }
+
+    return this.applyValidationVote(params);
+  }
+
+  recordDenial(params: RecordValidationVoteParams): OccurrenceValidationResult {
+    if (params.vote.voteType !== 'deny') {
+      throw new Error('Expected deny vote');
+    }
+
+    return this.applyValidationVote(params);
+  }
+
+  toProps(): OccurrenceProps {
+    return {
+      ...this.props,
+      problemLocation: { ...this.props.problemLocation },
+      storedMapLocation: { ...this.props.storedMapLocation },
+      contributorRef: { ...this.props.contributorRef },
+    };
+  }
+
+  private applyValidationVote(
+    params: RecordValidationVoteParams,
+  ): OccurrenceValidationResult {
+    if (params.expectedVersion !== this.props.version) {
+      throw new OccurrenceVersionMismatchError();
+    }
+
+    if (
+      this.props.status === 'resolved' ||
+      this.props.status === 'evolved'
+    ) {
+      throw new OccurrenceValidationClosedError();
+    }
+
+    const voteType = params.vote.voteType;
+    const previousConfidence = this.props.confidenceLevel;
+    const previousStatus = this.props.status;
+
+    const newConfidence = ConfidenceCalculator.calculate({
+      currentLevel: previousConfidence,
+      voteType,
+      trustWeight: params.vote.trustWeightApplied,
+      policy: params.policy,
+    });
+
+    const newStatus = StatusTransitionService.resolveStatus({
+      currentStatus: previousStatus,
+      confidence: newConfidence,
+      distinctConfirms: params.voteStats.distinctConfirms,
+      weightedConfirmScore: params.voteStats.weightedConfirmScore,
+      policy: params.policy,
+      isFirstVoteOnOccurrence: params.voteStats.totalVoteCount === 1,
+    });
+
+    this.props.confidenceLevel = newConfidence;
+    this.props.status = newStatus;
+    this.props.version += 1;
+    this.props.updatedAt = params.clock();
+
+    const events: OccurrenceValidationEvent[] = [];
+
+    if (voteType === 'confirm') {
+      events.push(
+        new OccurrenceConfirmedEvent({
+          occurrenceId: this.id,
+          cityId: this.cityId,
+          newConfidence,
+          distinctConfirms: params.voteStats.distinctConfirms,
+        }),
+      );
+    } else {
+      events.push(
+        new OccurrenceDeniedEvent({
+          occurrenceId: this.id,
+          cityId: this.cityId,
+          newConfidence,
+        }),
+      );
+    }
+
+    if (
+      previousConfidence !== newConfidence ||
+      previousStatus !== newStatus
+    ) {
+      events.push(
+        new OccurrenceConfidenceChangedEvent({
+          occurrenceId: this.id,
+          cityId: this.cityId,
+          fromConfidence: previousConfidence,
+          toConfidence: newConfidence,
+          status: newStatus,
+        }),
+      );
+    }
+
+    return { occurrence: this, events };
   }
 }

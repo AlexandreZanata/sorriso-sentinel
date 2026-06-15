@@ -1,0 +1,77 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  InvalidUserAccountStateError,
+  UserAccount,
+  USER_ACCOUNT_REPOSITORY,
+  type UserAccountRepositoryPort,
+} from '@sorriso-sentinel/domain';
+import { updateMyAccountSchema } from '@sorriso-sentinel/shared';
+import type { SessionClaims } from '../../../infrastructure/auth/hmac-session-token.service';
+
+export interface UpdateMyAccountResponse {
+  id: string;
+  displayName: string;
+  showIdentityOnReports: boolean;
+  version: number;
+}
+
+@Injectable()
+export class UpdateMyAccountHandler {
+  constructor(
+    @Inject(USER_ACCOUNT_REPOSITORY)
+    private readonly accounts: UserAccountRepositoryPort,
+  ) {}
+
+  async execute(
+    body: unknown,
+    session: SessionClaims,
+  ): Promise<UpdateMyAccountResponse> {
+    const parsed = updateMyAccountSchema.safeParse(body);
+
+    if (!parsed.success) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        issues: parsed.error.issues,
+      });
+    }
+
+    const props = await this.accounts.findByContributorId(
+      session.cityId,
+      session.contributorId,
+    );
+
+    if (!props) {
+      throw new NotFoundException({ code: 'USER_ACCOUNT_NOT_FOUND' });
+    }
+
+    const account = UserAccount.rehydrate(props);
+
+    try {
+      account.updateProfile({
+        displayName: parsed.data.displayName,
+        showIdentityOnReports: parsed.data.showIdentityOnReports,
+        clock: () => new Date(),
+      });
+    } catch (error) {
+      if (error instanceof InvalidUserAccountStateError) {
+        throw new BadRequestException({ code: 'INVALID_ACCOUNT_STATE' });
+      }
+
+      throw error;
+    }
+
+    await this.accounts.save(account.toProps());
+
+    return {
+      id: account.id,
+      displayName: account.displayName,
+      showIdentityOnReports: account.showIdentityOnReports,
+      version: account.version,
+    };
+  }
+}

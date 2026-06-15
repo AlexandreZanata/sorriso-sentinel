@@ -6,10 +6,25 @@ import {
   Module,
   type OnModuleDestroy,
 } from '@nestjs/common';
-import { CONTRIBUTOR_IDENTITY_REPOSITORY } from '@sorriso-sentinel/domain';
+import {
+  ABUSE_SIGNAL_PORT,
+  CONTRIBUTOR_IDENTITY_REPOSITORY,
+  PQC_CRYPTO_PORT,
+  USER_ACCOUNT_REPOSITORY,
+  VALIDATION_VOTE_REPOSITORY,
+} from '@sorriso-sentinel/domain';
 import { createDatabasePool } from '@sorriso-sentinel/database';
 import type pg from 'pg';
+import { DevPqcCryptoService } from '../crypto/dev-pqc-crypto.service';
+import {
+  DrizzleUserAccountRepository,
+  InMemoryUserAccountRepository,
+} from './drizzle-user-account.repository';
 import { InMemoryContributorIdentityRepository } from '../identity/in-memory-contributor-identity.repository';
+import {
+  InMemoryAbuseSignalService,
+  RedisAbuseSignalService,
+} from '../identity/redis-abuse-signal.service';
 import {
   InMemoryOccurrenceStore,
   OCCURRENCE_STORE,
@@ -17,6 +32,14 @@ import {
 import { DrizzleOccurrenceEventPublisher } from '../occurrences/drizzle-occurrence-event.publisher';
 import { InMemoryOccurrenceEventPublisher } from '../occurrences/in-memory-occurrence-event.publisher';
 import { OCCURRENCE_EVENT_PUBLISHER } from '../occurrences/occurrence-event-publisher.port';
+import {
+  REPUTATION_PORT,
+  StubReputationPort,
+} from '../reputation/stub-reputation.port';
+import {
+  DrizzleValidationVoteRepository,
+  InMemoryValidationVoteRepository,
+} from '../validation/drizzle-validation-vote.repository';
 import { DATABASE_POOL } from './database.tokens';
 import { DrizzleContributorIdentityRepository } from './drizzle-contributor-identity.repository';
 import {
@@ -72,6 +95,17 @@ export class DatabaseModule {
             provide: OCCURRENCE_EVENT_PUBLISHER,
             useClass: InMemoryOccurrenceEventPublisher,
           },
+          {
+            provide: VALIDATION_VOTE_REPOSITORY,
+            useClass: InMemoryValidationVoteRepository,
+          },
+          {
+            provide: USER_ACCOUNT_REPOSITORY,
+            useClass: InMemoryUserAccountRepository,
+          },
+          { provide: ABUSE_SIGNAL_PORT, useClass: InMemoryAbuseSignalService },
+          { provide: PQC_CRYPTO_PORT, useClass: DevPqcCryptoService },
+          { provide: REPUTATION_PORT, useClass: StubReputationPort },
         ],
         exports: [
           DATABASE_POOL,
@@ -80,6 +114,11 @@ export class DatabaseModule {
           OCCURRENCE_COMMENT_STORE,
           OCCURRENCE_ID_GENERATOR,
           OCCURRENCE_EVENT_PUBLISHER,
+          VALIDATION_VOTE_REPOSITORY,
+          USER_ACCOUNT_REPOSITORY,
+          ABUSE_SIGNAL_PORT,
+          PQC_CRYPTO_PORT,
+          REPUTATION_PORT,
         ],
       };
     }
@@ -109,6 +148,17 @@ export class DatabaseModule {
           provide: OCCURRENCE_EVENT_PUBLISHER,
           useClass: DrizzleOccurrenceEventPublisher,
         },
+        {
+          provide: VALIDATION_VOTE_REPOSITORY,
+          useClass: DrizzleValidationVoteRepository,
+        },
+        {
+          provide: USER_ACCOUNT_REPOSITORY,
+          useClass: DrizzleUserAccountRepository,
+        },
+        { provide: ABUSE_SIGNAL_PORT, useClass: RedisAbuseSignalService },
+        { provide: PQC_CRYPTO_PORT, useClass: DevPqcCryptoService },
+        { provide: REPUTATION_PORT, useClass: StubReputationPort },
       ],
       exports: [
         DATABASE_POOL,
@@ -117,6 +167,11 @@ export class DatabaseModule {
         OCCURRENCE_COMMENT_STORE,
         OCCURRENCE_ID_GENERATOR,
         OCCURRENCE_EVENT_PUBLISHER,
+        VALIDATION_VOTE_REPOSITORY,
+        USER_ACCOUNT_REPOSITORY,
+        ABUSE_SIGNAL_PORT,
+        PQC_CRYPTO_PORT,
+        REPUTATION_PORT,
       ],
     };
   }
