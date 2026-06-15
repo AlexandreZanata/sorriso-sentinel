@@ -76,6 +76,12 @@ docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T 
   "SELECT COUNT(*) FROM occurrences WHERE id = '${occurrence_id}';" \
   | grep -q 1
 
+echo "==> OccurrenceCreated in domain_outbox"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT COUNT(*) FROM domain_outbox WHERE event_type = 'OccurrenceCreated' AND payload->>'occurrenceId' = '${occurrence_id}';" \
+  | grep -q 1
+
 echo "==> PATCH identity mode to pseudonym"
 mode_payload="$(curl -sf -X PATCH "${api_url}/identity/mode" \
   -H "Authorization: Bearer ${token}" \

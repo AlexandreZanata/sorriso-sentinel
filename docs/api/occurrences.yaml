@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Sorriso Sentinel API — Occurrences
+  version: 0.1.0
+  description: Stub for occurrence creation (v1 write path).
+
+paths:
+  /occurrences:
+    post:
+      operationId: createOccurrence
+      summary: Create a new occurrence report
+      tags: [Occurrences]
+      security:
+        - sessionBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOccurrenceRequest'
+      responses:
+        '201':
+          description: Occurrence created (status unverified, confidence 0)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOccurrenceResponse'
+        '400':
+          description: Validation error, invalid category, or doxxing detected
+        '401':
+          description: Session required
+        '403':
+          description: City mismatch (tenant isolation)
+        '429':
+          description: Rate limit exceeded (10 creates per hour per reputation)
+
+components:
+  securitySchemes:
+    sessionBearer:
+      type: http
+      scheme: bearer
+      description: HMAC session token from POST /sessions/bootstrap
+
+  schemas:
+    CreateOccurrenceRequest:
+      type: object
+      additionalProperties: false
+      required: [category, latitude, longitude]
+      properties:
+        cityId:
+          type: string
+          format: uuid
+          description: Optional; defaults to session city. Must match session tenant.
+        category:
+          type: string
+          minLength: 1
+          maxLength: 64
+          example: pothole
+        description:
+          type: string
+          maxLength: 2000
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        privacyLevel:
+          type: string
+          enum: [public, neighborhood, approximate, hidden]
+          default: public
+        occurrenceKind:
+          type: string
+          enum: [problem, temporary_event]
+
+    CreateOccurrenceResponse:
+      type: object
+      required:
+        - id
+        - cityId
+        - category
+        - status
+        - confidenceLevel
+        - latitude
+        - longitude
+        - privacyLevel
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: PostgreSQL uuidv7 primary key
+        cityId:
+          type: string
+          format: uuid
+        category:
+          type: string
+        status:
+          type: string
+          enum: [unverified]
+        confidenceLevel:
+          type: integer
+          enum: [0]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        privacyLevel:
+          type: string
+        description:
+          type: string
+        author:
+          type: object
+          properties:
+            displayPolicy:
+              type: string
+              enum: [ghost, pseudonym, public, forced_ghost]
+            pseudonym:
+              type: string
+              nullable: true

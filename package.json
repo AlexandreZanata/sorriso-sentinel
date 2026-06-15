@@ -36,6 +36,7 @@
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:validate": "bash scripts/docker-validate.sh",
     "docker:api-smoke": "bash scripts/docker-api-smoke.sh",
+    "docker:api-routes": "bash scripts/docker-api-routes.sh",
     "db:migrate": "bash scripts/migrate.sh"
   },
   "devDependencies": {
