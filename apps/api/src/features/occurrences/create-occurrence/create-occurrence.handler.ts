@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -13,6 +14,8 @@ import {
 import { createOccurrenceSchema } from '@sorriso-sentinel/shared';
 import { randomUUID } from 'node:crypto';
 import type { SessionClaims } from '../../../infrastructure/auth/hmac-session-token.service';
+import type { RateLimiterPort } from '../../../infrastructure/redis/rate-limiter.port';
+import { REDIS_RATE_LIMITER } from '../../../infrastructure/redis/redis.tokens';
 import {
   OCCURRENCE_STORE,
   type OccurrenceStorePort,
@@ -45,6 +48,8 @@ export class CreateOccurrenceHandler {
   constructor(
     @Inject(OCCURRENCE_STORE)
     private readonly occurrences: OccurrenceStorePort,
+    @Inject(REDIS_RATE_LIMITER)
+    private readonly rateLimiter: RateLimiterPort,
   ) {}
 
   async execute(
@@ -68,6 +73,16 @@ export class CreateOccurrenceHandler {
 
     if (cityId !== session.cityId) {
       throw new ForbiddenException({ code: 'CITY_MISMATCH' });
+    }
+
+    const rateLimit = await this.rateLimiter.consume(
+      `occurrence:${session.reputationId}`,
+      10,
+      3600,
+    );
+
+    if (!rateLimit.allowed) {
+      throw new HttpException({ code: 'RATE_LIMIT_EXCEEDED' }, 429);
     }
 
     if (parsed.data.description) {

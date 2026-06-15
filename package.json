@@ -34,7 +34,8 @@
     "commitlint": "commitlint --edit",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d --wait",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
-    "docker:validate": "bash scripts/docker-validate.sh"
+    "docker:validate": "bash scripts/docker-validate.sh",
+    "docker:api-smoke": "bash scripts/docker-api-smoke.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

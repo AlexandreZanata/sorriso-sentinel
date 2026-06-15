@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Inject,
   Injectable,
 } from '@nestjs/common';
@@ -16,6 +17,8 @@ import {
   type SessionTokenIssuerPort,
 } from '../../../infrastructure/auth/hmac-session-token.service';
 import { generateReputationId } from '../../../infrastructure/reputation/reputation-id.generator';
+import { REDIS_RATE_LIMITER } from '../../../infrastructure/redis/redis.tokens';
+import type { RateLimiterPort } from '../../../infrastructure/redis/rate-limiter.port';
 
 export interface BootstrapSessionResult {
   sessionToken: string;
@@ -31,6 +34,8 @@ export class BootstrapSessionHandler {
     private readonly contributors: ContributorIdentityRepositoryPort,
     @Inject(SESSION_TOKEN_ISSUER)
     private readonly sessionTokens: SessionTokenIssuerPort,
+    @Inject(REDIS_RATE_LIMITER)
+    private readonly rateLimiter: RateLimiterPort,
   ) {}
 
   async execute(body: unknown): Promise<BootstrapSessionResult> {
@@ -41,6 +46,16 @@ export class BootstrapSessionHandler {
         code: 'VALIDATION_ERROR',
         issues: parsed.error.issues,
       });
+    }
+
+    const rateLimit = await this.rateLimiter.consume(
+      `bootstrap:${parsed.data.cityId}:${parsed.data.localKeyRef}`,
+      30,
+      3600,
+    );
+
+    if (!rateLimit.allowed) {
+      throw new HttpException({ code: 'RATE_LIMIT_EXCEEDED' }, 429);
     }
 
     const existing = await this.contributors.findByLocalKeyRef(
