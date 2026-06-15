@@ -13,3 +13,4 @@ export * from './identity/services/sensitive-category-policy.js';
 export * from './identity/services/doxxing-patterns.js';
 export * from './identity/services/content-policy.service.js';
 export * from './identity/ports/content-policy.port.js';
+export * from './identity/ports/contributor-identity.repository.port.js';
