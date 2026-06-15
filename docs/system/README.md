@@ -13,6 +13,8 @@ Sorriso Sentinel transforms dispersed local knowledge into collective urban inte
 | [City health](city-health.md) | Neighborhood and city indicators |
 | [Privacy and identity](privacy-and-identity.md) | 15 privacy principles, three-layer model |
 
+Security enforcement for privacy rules: [security docs](../security/README.md).
+
 ## Architecture
 
 | Guide | Description |

@@ -43,7 +43,10 @@ Include:
 
 This project follows practices documented in:
 
+- [docs/security/README.md](docs/security/README.md) — security modules and **phase gate checklist**
+- [docs/security/phase-gate-checklist.md](docs/security/phase-gate-checklist.md) — verify before each development phase
 - [.cursor/rules/04-security.mdc](.cursor/rules/04-security.mdc)
+- [.cursor/rules/19-security-phase-gate.mdc](.cursor/rules/19-security-phase-gate.mdc)
 - [docs/contributing/ci-cd.md](docs/contributing/ci-cd.md) (security scanning in CI)
 
 Never commit secrets, credentials, or API keys to the repository.

@@ -34,6 +34,13 @@ All project documentation **must be written in English**.
 | [Monorepo structure](architecture/monorepo-structure.md) | Turborepo layout, Vertical Slice modules |
 | [ADRs](adr/README.md) | Architecture Decision Records |
 
+## Security
+
+| Guide | Description |
+|-------|-------------|
+| [Security docs](security/README.md) | Standards, OWASP-aligned controls, phase gate checklist |
+| [Phase gate checklist](security/phase-gate-checklist.md) | **Mandatory review before each development phase** |
+
 ## System logic
 
 | Guide | Description |
