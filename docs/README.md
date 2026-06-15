@@ -48,6 +48,18 @@ All project documentation **must be written in English**.
 | [System docs](system/README.md) | Domain model, lifecycle, privacy, intelligence |
 | [Feature modules](features/README.md) | **Per-feature business rules, flows, DDD, and TDD plans** |
 
+## Mobile app
+
+| Guide | Description |
+|-------|-------------|
+| [Mobile docs](mobile/README.md) | i18n, atomic design, components, API routes, navigation |
+
+## API
+
+| Guide | Description |
+|-------|-------------|
+| [API docs](api/README.md) | Interactive `/docs`, spec.json, route catalog |
+
 ## Language policy
 
 - **Code, comments, tests, commits, PRs, docs**: English only

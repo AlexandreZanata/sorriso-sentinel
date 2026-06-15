@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Mobile app documentation hub (`docs/mobile/`): architecture, i18n, atomic design, component catalog, API routes, navigation
 - Phase 8 production hardening: Helmet security headers, HSTS with `TRUST_PROXY`, production CORS allowlist guard
 - Production bootstrap rejects dev JWT/session secrets when `NODE_ENV=production`
 - `npm run validate:security` (production dependency audit) and `npm run docker:prod-validate`

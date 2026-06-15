@@ -10,7 +10,7 @@ sorriso-sentinel/
 │   ├── api/                 # NestJS — HTTP API, CQRS command handlers
 │   ├── worker/              # BullMQ consumers (media, trends, missions)
 │   ├── web/                 # Next.js — public map, admin, SSR
-│   └── mobile/              # React Native + Expo
+│   └── mobile/              # React Native + Expo — see docs/mobile/
 ├── packages/
 │   ├── domain/              # Entities, VOs, domain events, ports (no framework imports)
 │   ├── shared/              # DTOs, validation schemas (Zod), shared types
@@ -117,4 +117,5 @@ lint → test → build
 
 - [Technology stack](stack.md)
 - [System overview](../system/overview.md)
+- [Mobile app](../mobile/README.md)
 - [Branches and workflow](../contributing/branches.md)
