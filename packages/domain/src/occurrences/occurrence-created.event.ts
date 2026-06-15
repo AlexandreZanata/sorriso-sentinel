@@ -4,7 +4,11 @@ export interface OccurrenceCreatedPayload {
   occurrenceId: string;
   cityId: string;
   category: string;
+  occurrenceKind: string;
   status: OccurrenceStatus;
+  confidenceLevel: number;
+  privacyLevel: string;
+  isSensitive: boolean;
   occurredAt: Date;
 }
 
