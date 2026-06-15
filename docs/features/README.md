@@ -75,6 +75,7 @@ Test names use behavior style: `should_reject_ghost_identity_when_displaying_sen
 | Module | Bounded context | Status |
 |--------|-----------------|--------|
 | [Anonymity](anonymity/README.md) | Identity & Privacy | Spec complete |
+| [User account](user-account/README.md) | Identity & Privacy (optional account) | Spec complete · domain Step 1–5 |
 | [Occurrence creation](occurrence-creation/README.md) | Occurrences | Spec complete |
 | [Community validation](community-validation/README.md) | Validation | Spec complete |
 | [Reputation](reputation/README.md) | Identity & Reputation | Spec complete |

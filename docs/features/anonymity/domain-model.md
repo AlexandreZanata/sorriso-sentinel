@@ -44,15 +44,17 @@ ContributorIdentity
 
 ### PublicProfile (aggregate root — optional)
 
-Only exists when user opts into traditional auth.
+Only exists when user opts into traditional auth. Implemented as **`UserAccount`** — see [User account module](../user-account/README.md).
 
 ```text
-PublicProfile
+UserAccount (PublicProfile)
 ├── id: PublicProfileId
 ├── cityId: CityId
 ├── contributorId: ContributorId (FK logical ref)
+├── email: EmailAddress (VO, encrypted at rest)
 ├── displayName: DisplayName (VO)
-├── credentialsRef: CredentialsRef (port to auth adapter)
+├── pqcPublicKeyRef: PqcPublicKeyRef (ML-DSA-65 fingerprint)
+├── lgpdConsent: LgpdConsent (VO)
 └── showIdentityOnReports: boolean (default false)
 ```
 
