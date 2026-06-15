@@ -4,6 +4,7 @@ export interface StoredOccurrence {
   id: string;
   cityId: string;
   category: string;
+  occurrenceKind: string;
   status: 'unverified';
   confidenceLevel: 0;
   latitude: number;
@@ -12,6 +13,8 @@ export interface StoredOccurrence {
   description?: string;
   reputationId: string;
   authorDisplayPolicy: AuthorDisplayPolicy;
+  isSensitive: boolean;
+  version: number;
   createdAt: Date;
 }
 

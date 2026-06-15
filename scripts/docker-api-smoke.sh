@@ -38,6 +38,17 @@ docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T 
 echo "==> API /health/ready"
 curl -sf "${api_url}/health/ready" | grep -q '"redis":"ok"'
 
+echo "==> PostgreSQL 18+ with native uuidv7()"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT split_part(current_setting('server_version'), '.', 1)::int >= 18;" \
+  | grep -q t
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT uuid_extract_version(uuidv7()) = 7;" \
+  | grep -q t
+
 echo "==> Bootstrap session"
 bootstrap_payload="$(curl -sf -X POST "${api_url}/sessions/bootstrap" \
   -H 'Content-Type: application/json' \

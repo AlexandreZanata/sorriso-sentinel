@@ -21,6 +21,9 @@ import {
   OCCURRENCE_COMMENT_STORE,
 } from './drizzle-occurrence-comment.store';
 import { DrizzleOccurrenceStore } from './drizzle-occurrence.store';
+import { InMemoryOccurrenceIdGenerator } from './in-memory-occurrence-id.generator';
+import { OCCURRENCE_ID_GENERATOR } from './occurrence-id-generator.port';
+import { PostgresOccurrenceIdGenerator } from './postgres-occurrence-id.generator';
 
 @Injectable()
 class DatabaseConnection implements OnModuleDestroy {
@@ -58,12 +61,17 @@ export class DatabaseModule {
               save: async () => undefined,
             },
           },
+          {
+            provide: OCCURRENCE_ID_GENERATOR,
+            useClass: InMemoryOccurrenceIdGenerator,
+          },
         ],
         exports: [
           DATABASE_POOL,
           CONTRIBUTOR_IDENTITY_REPOSITORY,
           OCCURRENCE_STORE,
           OCCURRENCE_COMMENT_STORE,
+          OCCURRENCE_ID_GENERATOR,
         ],
       };
     }
@@ -85,12 +93,17 @@ export class DatabaseModule {
           provide: OCCURRENCE_COMMENT_STORE,
           useClass: DrizzleOccurrenceCommentStore,
         },
+        {
+          provide: OCCURRENCE_ID_GENERATOR,
+          useClass: PostgresOccurrenceIdGenerator,
+        },
       ],
       exports: [
         DATABASE_POOL,
         CONTRIBUTOR_IDENTITY_REPOSITORY,
         OCCURRENCE_STORE,
         OCCURRENCE_COMMENT_STORE,
+        OCCURRENCE_ID_GENERATOR,
       ],
     };
   }
