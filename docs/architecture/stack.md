@@ -123,7 +123,7 @@ docker compose:
   - worker (BullMQ consumers)
 ```
 
-See [monorepo structure](monorepo-structure.md) and [development setup](../contributing/development-setup.md).
+See [monorepo structure](monorepo-structure.md), [mobile app docs](../mobile/README.md), and [development setup](../contributing/development-setup.md).
 
 ## ADRs
 
