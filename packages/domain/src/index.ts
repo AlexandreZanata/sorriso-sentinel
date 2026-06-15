@@ -22,3 +22,7 @@ export * from './identity/services/doxxing-patterns.js';
 export * from './identity/services/content-policy.service.js';
 export * from './identity/ports/content-policy.port.js';
 export * from './identity/ports/contributor-identity.repository.port.js';
+export * from './validation/services/self-validation.policy.js';
+export * from './validation/services/duplicate-vote.policy.js';
+export * from './validation/value-objects/comment-text.vo.js';
+export * from './validation/value-objects/validation-policy.vo.js';
