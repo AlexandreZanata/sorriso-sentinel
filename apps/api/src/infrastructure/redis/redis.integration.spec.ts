@@ -25,7 +25,11 @@ describeRedis('Redis integration', () => {
   it('should_report_redis_ok_on_ready', async () => {
     const response = await request(app.getHttpServer()).get('/health/ready').expect(200);
 
-    expect(response.body).toEqual({ status: 'ready', redis: 'ok' });
+    expect(response.body).toEqual({
+      status: 'ready',
+      redis: 'ok',
+      postgres: 'disabled',
+    });
   });
 
   it('should_persist_bootstrap_identity_in_redis', async () => {

@@ -69,6 +69,10 @@ export class RedisContributorIdentityRepository
     return this.deserialize(raw);
   }
 
+  async findByPseudonym(): Promise<ContributorIdentity | null> {
+    return null;
+  }
+
   private idKey(cityId: string, id: string): string {
     return `sentinel:contributor:id:${cityId}:${id}`;
   }

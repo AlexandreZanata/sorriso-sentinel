@@ -7,9 +7,11 @@ COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY apps/api ./apps/api
 COPY packages/domain ./packages/domain
 COPY packages/shared ./packages/shared
+COPY packages/database ./packages/database
 RUN npm ci \
   && npm run build -w @sorriso-sentinel/domain \
   && npm run build -w @sorriso-sentinel/shared \
+  && npm run build -w @sorriso-sentinel/database \
   && npm run build -w @sorriso-sentinel/api
 
 FROM node:20.19.4-alpine AS runner
@@ -23,6 +25,7 @@ COPY --from=build --chown=sentinel:sentinel /app/apps/api/dist ./dist
 COPY --from=build --chown=sentinel:sentinel /app/node_modules ./node_modules
 COPY --from=build --chown=sentinel:sentinel /app/packages/domain ./packages/domain
 COPY --from=build --chown=sentinel:sentinel /app/packages/shared ./packages/shared
+COPY --from=build --chown=sentinel:sentinel /app/packages/database ./packages/database
 COPY --from=build --chown=sentinel:sentinel /app/apps/api/package.json ./package.json
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

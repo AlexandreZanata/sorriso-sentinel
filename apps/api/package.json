@@ -15,6 +15,7 @@
     "@nestjs/common": "^11.1.2",
     "@nestjs/core": "^11.1.2",
     "@nestjs/platform-express": "^11.1.2",
+    "@sorriso-sentinel/database": "*",
     "@sorriso-sentinel/domain": "*",
     "@sorriso-sentinel/shared": "*",
     "ioredis": "^5.11.1",

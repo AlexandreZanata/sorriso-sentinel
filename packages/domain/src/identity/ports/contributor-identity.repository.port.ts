@@ -7,6 +7,10 @@ export interface ContributorIdentityRepositoryPort {
     localKeyRef: string,
     cityId: string,
   ): Promise<ContributorIdentity | null>;
+  findByPseudonym(
+    pseudonym: string,
+    cityId: string,
+  ): Promise<ContributorIdentity | null>;
 }
 
 export const CONTRIBUTOR_IDENTITY_REPOSITORY = Symbol(

@@ -6,11 +6,8 @@ import {
   Module,
   type OnModuleDestroy,
 } from '@nestjs/common';
-import { CONTRIBUTOR_IDENTITY_REPOSITORY } from '@sorriso-sentinel/domain';
 import Redis from 'ioredis';
-import { InMemoryContributorIdentityRepository } from '../identity/in-memory-contributor-identity.repository';
 import { NoOpRateLimiter } from './no-op-rate-limiter.service';
-import { RedisContributorIdentityRepository } from './redis-contributor-identity.repository';
 import { RedisHealthService } from './redis-health.service';
 import { RedisRateLimiterService } from './redis-rate-limiter.service';
 import { REDIS_CLIENT, REDIS_HEALTH, REDIS_RATE_LIMITER } from './redis.tokens';
@@ -42,17 +39,8 @@ export class RedisModule {
           { provide: REDIS_CLIENT, useValue: null },
           { provide: REDIS_HEALTH, useClass: RedisHealthService },
           { provide: REDIS_RATE_LIMITER, useClass: NoOpRateLimiter },
-          {
-            provide: CONTRIBUTOR_IDENTITY_REPOSITORY,
-            useClass: InMemoryContributorIdentityRepository,
-          },
         ],
-        exports: [
-          REDIS_CLIENT,
-          REDIS_HEALTH,
-          REDIS_RATE_LIMITER,
-          CONTRIBUTOR_IDENTITY_REPOSITORY,
-        ],
+        exports: [REDIS_CLIENT, REDIS_HEALTH, REDIS_RATE_LIMITER],
       };
     }
 
@@ -73,17 +61,8 @@ export class RedisModule {
         RedisConnection,
         { provide: REDIS_HEALTH, useClass: RedisHealthService },
         { provide: REDIS_RATE_LIMITER, useClass: RedisRateLimiterService },
-        {
-          provide: CONTRIBUTOR_IDENTITY_REPOSITORY,
-          useClass: RedisContributorIdentityRepository,
-        },
       ],
-      exports: [
-        REDIS_CLIENT,
-        REDIS_HEALTH,
-        REDIS_RATE_LIMITER,
-        CONTRIBUTOR_IDENTITY_REPOSITORY,
-      ],
+      exports: [REDIS_CLIENT, REDIS_HEALTH, REDIS_RATE_LIMITER],
     };
   }
 }

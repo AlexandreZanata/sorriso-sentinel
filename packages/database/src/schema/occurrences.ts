@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   integer,
   pgTable,
   text,
@@ -19,6 +20,11 @@ export const occurrences = pgTable('occurrences', {
   latitude: doublePrecision('latitude').notNull(),
   longitude: doublePrecision('longitude').notNull(),
   privacyLevel: text('privacy_level').notNull().default('public'),
+  contributorReputationId: text('contributor_reputation_id').notNull(),
+  occurrenceKind: text('occurrence_kind').notNull().default('problem'),
+  isSensitive: boolean('is_sensitive').notNull().default(false),
+  authorDisplayPolicy: text('author_display_policy').notNull().default('ghost'),
+  description: text('description'),
   version: integer('version').notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()

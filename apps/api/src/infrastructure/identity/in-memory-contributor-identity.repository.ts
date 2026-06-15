@@ -30,4 +30,19 @@ export class InMemoryContributorIdentityRepository
   ): Promise<ContributorIdentity | null> {
     return this.byLocalKey.get(`${cityId}:${localKeyRef}`) ?? null;
   }
+
+  async findByPseudonym(
+    pseudonym: string,
+    cityId: string,
+  ): Promise<ContributorIdentity | null> {
+    for (const identity of this.byId.values()) {
+      if (
+        identity.cityId === cityId &&
+        identity.pseudonym?.toLowerCase() === pseudonym.toLowerCase()
+      ) {
+        return identity;
+      }
+    }
+    return null;
+  }
 }
