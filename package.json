@@ -1,0 +1,28 @@
+{
+  "name": "sorriso-sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open source monitoring and sentinel platform",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "setup": "bash scripts/setup.sh",
+    "lint": "markdownlint-cli2 \"**/*.md\" \"#node_modules/**\"",
+    "lint:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules/**\"",
+    "validate:oss": "bash scripts/validate-oss.sh",
+    "validate:version": "bash scripts/validate-version.sh",
+    "validate:branch": "bash scripts/check-branch.sh",
+    "validate": "npm run validate:oss && npm run validate:version && npm run lint",
+    "check": "npm run validate:branch && npm run validate",
+    "commitlint": "commitlint --edit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "husky": "^9.1.7",
+    "markdownlint-cli2": "^0.17.0"
+  }
+}

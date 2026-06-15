@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Pull requests
 
-Full guide: `docs/contributing/pull-requests.md`
+Full guides: `docs/contributing/pull-requests.md`, `docs/contributing/branches.md`
 
 ## PR title
 

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Commits
 
-Full guide: `docs/contributing/commits.md`
+Full guides: `docs/contributing/commits.md`, `docs/contributing/branches.md`
 
 ## Format (Conventional Commits, English)
 

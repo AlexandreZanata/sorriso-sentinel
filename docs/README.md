@@ -6,6 +6,8 @@ All project documentation **must be written in English**.
 
 | Guide | Description |
 |-------|-------------|
+| [Development setup](contributing/development-setup.md) | Local environment, git hooks, commands |
+| [Branches](contributing/branches.md) | Branch strategy, development flow, where to commit |
 | [Commits](contributing/commits.md) | Commit message format and git rules |
 | [Pull Requests](contributing/pull-requests.md) | PR template, review criteria, merge requirements |
 | [CI/CD](contributing/ci-cd.md) | Pipeline stages, deployment, and infrastructure |
@@ -21,7 +23,15 @@ All project documentation **must be written in English**.
 
 | Guide | Description |
 |-------|-------------|
-| [ADRs](adr/README.md) | Architecture Decision Records — how to write and store them |
+| [Technology stack](architecture/stack.md) | NestJS, PostgreSQL 18.1, Redis, clients |
+| [Monorepo structure](architecture/monorepo-structure.md) | Turborepo layout, Vertical Slice modules |
+| [ADRs](adr/README.md) | Architecture Decision Records |
+
+## System logic
+
+| Guide | Description |
+|-------|-------------|
+| [System docs](system/README.md) | Domain model, lifecycle, privacy, intelligence |
 
 ## Language policy
 

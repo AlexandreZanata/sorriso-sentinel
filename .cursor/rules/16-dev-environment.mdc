@@ -1,0 +1,38 @@
+---
+description: Local development setup, commands, and git hooks
+alwaysApply: true
+---
+
+# Development environment
+
+Full guide: `docs/contributing/development-setup.md`
+
+## Setup
+
+```bash
+nvm use && make setup
+cp .env.example .env
+```
+
+## Before every PR
+
+```bash
+make check   # branch guard + CI parity validation
+```
+
+## Workflow
+
+1. Never commit on `main` — use topic branch (`feat/`, `fix/`, etc.)
+2. Husky enforces pre-commit validation and Conventional Commits
+3. Local `npm run validate` mirrors CI
+
+## Commands
+
+| Command | Purpose |
+|---------|---------|
+| `make setup` | Install deps + git hooks |
+| `make check` | Full validation before PR |
+| `make validate` | CI parity (oss, version, lint) |
+| `make lint` | Markdown lint |
+
+When stack is defined, extend with `test`, `build`, and integration commands.

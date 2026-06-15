@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Nothing yet.
+- Local development environment: Node tooling, Husky git hooks, commitlint, Makefile
+- `docs/contributing/development-setup.md` and `docs/contributing/branches.md`
+- CI parity via `npm run validate` and `make check`
+- System logic documentation (`docs/system/`) and architecture stack (`docs/architecture/`)
+- ADRs: PostgreSQL 18.1 UUID v7, occurrence-centric domain, privacy by default
 
 ## [0.1.0] - 2026-06-15
 

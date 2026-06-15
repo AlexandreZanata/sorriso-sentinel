@@ -14,10 +14,11 @@ Pipeline configuration and all CI-related documentation **must be written in Eng
 
 ## Branch strategy
 
-- `main` — protected; deployable at all times
-- Feature branches — `feat/<short-description>`, `fix/<short-description>`
-- PRs required to merge into `main`
-- No direct pushes to `main` (except hotfix policy if defined)
+See [branches.md](branches.md) for the full development workflow.
+
+- `main` — protected; deployable at all times; merges via PR only
+- Topic branches — `feat/`, `fix/`, `docs/`, `chore/`, etc.
+- No direct pushes to `main`
 
 ## Required checks before merge
 
@@ -70,7 +71,16 @@ Pipeline **fails** on:
 Contributors should be able to run the same checks locally before pushing:
 
 ```bash
-# Example — adjust when stack is defined
+make setup    # first time only
+make check    # before every PR — branch guard + validate
+make validate # CI parity only (oss, version, lint)
+```
+
+See [development-setup.md](development-setup.md) for full local environment setup.
+
+When the application stack is defined, extend with:
+
+```bash
 # npm run lint && npm test && npm run build
 # docker compose up -d && npm run test:integration
 ```
