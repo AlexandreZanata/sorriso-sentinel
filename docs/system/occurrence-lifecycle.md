@@ -49,6 +49,8 @@ A contributor reports an occurrence. It is born as:
 
 **Domain event**: `OccurrenceCreated`
 
+> **Implementation detail:** [Occurrence creation feature module](../features/occurrence-creation/README.md) — permissions, flows, domain factory, TDD plan.
+
 ## 2. Community validation
 
 Other contributors can:

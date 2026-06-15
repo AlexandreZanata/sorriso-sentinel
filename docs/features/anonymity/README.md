@@ -38,6 +38,9 @@ If reporting a pothole requires an account, people report potholes. If reporting
 Anonymity (Identity & Privacy)
     │
     ├── supplies reputationId to ──▶ Occurrences (author reference only)
+    │                                    ▲
+    │                                    │ ContributorRef required
+    └── see Occurrence creation ─────────┘  [occurrence-creation](../occurrence-creation/README.md)
     ├── constrains visibility in ──▶ Validation (comments, confirms)
     ├── triggers rules in ──────────▶ Media (EXIF strip — worker)
     └── enforced by ────────────────▶ Security (RLS, audit roles)
