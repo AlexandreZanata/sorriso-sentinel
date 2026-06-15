@@ -1,7 +1,7 @@
 # Community Validation Module
 
 **Bounded context:** Validation (orchestrates Occurrences + Comments)  
-**Status:** spec complete (implementation not started)  
+**Status:** spec complete · domain Steps 1–2 in implementation  
 **ADR:** [0003 — Occurrence-centric domain](../../adr/0003-occurrence-centric-domain.md)
 
 ## One-line summary
@@ -19,7 +19,7 @@ Raw reports are unreliable. Community validation turns isolated claims into **tr
 | **Confirmation** | Contributor attests the occurrence is real / accurate |
 | **Denial** | Contributor attests the occurrence is false / inaccurate |
 | **Comment** | Text context — filtered for doxxing; not a vote |
-| **Validation vote** | One confirm **or** deny per contributor per occurrence (v1) |
+| **Validation vote** | One confirm **or** deny per contributor per occurrence (v1) — **not** a star rating |
 | **Confidence level** | 0–100% on the occurrence — derived from weighted votes |
 | **Consensus threshold** | Minimum independent confirmations to reach `active` |
 | **Trust weight** | Invisible multiplier from reputation — [reputation doc](../../system/reputation-and-trust.md) |
