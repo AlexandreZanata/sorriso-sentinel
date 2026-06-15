@@ -38,6 +38,17 @@ docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T 
 echo "==> API /health/ready"
 curl -sf "${api_url}/health/ready" | grep -q '"redis":"ok"'
 
+echo "==> PostgreSQL 18+ with native uuidv7()"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT split_part(current_setting('server_version'), '.', 1)::int >= 18;" \
+  | grep -q t
+
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT uuid_extract_version(uuidv7()) = 7;" \
+  | grep -q t
+
 echo "==> Bootstrap session"
 bootstrap_payload="$(curl -sf -X POST "${api_url}/sessions/bootstrap" \
   -H 'Content-Type: application/json' \
@@ -63,6 +74,12 @@ occurrence_id="$(echo "${occurrence_payload}" | python3 -c "import sys, json; pr
 docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
   psql -U sentinel -d sorriso_sentinel -tAc \
   "SELECT COUNT(*) FROM occurrences WHERE id = '${occurrence_id}';" \
+  | grep -q 1
+
+echo "==> OccurrenceCreated in domain_outbox"
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" exec -T postgres \
+  psql -U sentinel -d sorriso_sentinel -tAc \
+  "SELECT COUNT(*) FROM domain_outbox WHERE event_type = 'OccurrenceCreated' AND payload->>'occurrenceId' = '${occurrence_id}';" \
   | grep -q 1
 
 echo "==> PATCH identity mode to pseudonym"

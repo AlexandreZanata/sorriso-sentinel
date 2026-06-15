@@ -28,14 +28,11 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         longitude: occurrence.longitude,
         privacyLevel: occurrence.privacyLevel,
         contributorReputationId: occurrence.reputationId,
-        occurrenceKind: 'problem',
-        isSensitive:
-          occurrence.authorDisplayPolicy === 'forced_ghost' ||
-          ['crime', 'violence', 'corruption', 'trafficking'].includes(
-            occurrence.category,
-          ),
+        occurrenceKind: occurrence.occurrenceKind,
+        isSensitive: occurrence.isSensitive,
         authorDisplayPolicy: occurrence.authorDisplayPolicy,
         description: occurrence.description,
+        version: occurrence.version,
         createdAt: occurrence.createdAt,
         updatedAt: occurrence.createdAt,
       });
@@ -62,6 +59,7 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         id: row.id,
         cityId: row.cityId,
         category: row.category,
+        occurrenceKind: row.occurrenceKind,
         status: row.status as 'unverified',
         confidenceLevel: row.confidenceLevel as 0,
         latitude: row.latitude,
@@ -70,6 +68,8 @@ export class DrizzleOccurrenceStore implements OccurrenceStorePort {
         description: row.description ?? undefined,
         reputationId: row.contributorReputationId,
         authorDisplayPolicy: row.authorDisplayPolicy as AuthorDisplayPolicy,
+        isSensitive: row.isSensitive,
+        version: row.version,
         createdAt: row.createdAt,
       };
     });

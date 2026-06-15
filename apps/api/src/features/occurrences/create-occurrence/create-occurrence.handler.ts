@@ -7,13 +7,20 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  ContentPolicyService,
-  SensitiveCategoryPolicy,
+  InvalidOccurrenceCategoryError,
+  Occurrence,
   type AuthorDisplayPolicy,
 } from '@sorriso-sentinel/domain';
 import { createOccurrenceSchema } from '@sorriso-sentinel/shared';
-import { randomUUID } from 'node:crypto';
 import type { SessionClaims } from '../../../infrastructure/auth/hmac-session-token.service';
+import {
+  OCCURRENCE_ID_GENERATOR,
+  type OccurrenceIdGeneratorPort,
+} from '../../../infrastructure/database/occurrence-id-generator.port';
+import {
+  OCCURRENCE_EVENT_PUBLISHER,
+  type OccurrenceEventPublisherPort,
+} from '../../../infrastructure/occurrences/occurrence-event-publisher.port';
 import type { RateLimiterPort } from '../../../infrastructure/redis/rate-limiter.port';
 import { REDIS_RATE_LIMITER } from '../../../infrastructure/redis/redis.tokens';
 import {
@@ -42,14 +49,15 @@ export interface CreateOccurrenceResponse {
 
 @Injectable()
 export class CreateOccurrenceHandler {
-  private readonly sensitivePolicy = SensitiveCategoryPolicy.default();
-  private readonly contentPolicy = ContentPolicyService.default();
-
   constructor(
     @Inject(OCCURRENCE_STORE)
     private readonly occurrences: OccurrenceStorePort,
     @Inject(REDIS_RATE_LIMITER)
     private readonly rateLimiter: RateLimiterPort,
+    @Inject(OCCURRENCE_EVENT_PUBLISHER)
+    private readonly eventPublisher: OccurrenceEventPublisherPort,
+    @Inject(OCCURRENCE_ID_GENERATOR)
+    private readonly occurrenceIds: OccurrenceIdGeneratorPort,
   ) {}
 
   async execute(
@@ -85,55 +93,90 @@ export class CreateOccurrenceHandler {
       throw new HttpException({ code: 'RATE_LIMIT_EXCEEDED' }, 429);
     }
 
-    if (parsed.data.description) {
-      const descriptionCheck = this.contentPolicy.validateUserText(
-        parsed.data.description,
-      );
+    let occurrence: Occurrence;
+    let event: Awaited<
+      ReturnType<typeof Occurrence.createNew>
+    >['event'];
 
-      if (!descriptionCheck.ok) {
-        throw new BadRequestException({ code: 'DOXXING_DETECTED' });
-      }
+    try {
+      const id = await this.occurrenceIds.generate();
+      const result = Occurrence.createNew({
+        cityId,
+        category: parsed.data.category,
+        occurrenceKind: parsed.data.occurrenceKind,
+        problemLocation: {
+          latitude: parsed.data.latitude,
+          longitude: parsed.data.longitude,
+        },
+        privacyLevel: parsed.data.privacyLevel,
+        description: parsed.data.description,
+        contributorRef: { reputationId: session.reputationId },
+        identityMode: session.identityMode,
+        idGenerator: () => id,
+        clock: () => new Date(),
+      });
+
+      occurrence = result.occurrence;
+      event = result.event;
+    } catch (error) {
+      this.rethrowDomainError(error);
     }
 
-    const authorDisplayPolicy = this.sensitivePolicy.applyAuthorDisplay(
-      parsed.data.category,
-      session.identityMode,
-    );
-
-    const occurrence: StoredOccurrence = {
-      id: randomUUID(),
-      cityId,
-      category: parsed.data.category,
-      status: 'unverified',
-      confidenceLevel: 0,
-      latitude: parsed.data.latitude,
-      longitude: parsed.data.longitude,
-      privacyLevel: parsed.data.privacyLevel,
-      description: parsed.data.description,
-      reputationId: session.reputationId,
-      authorDisplayPolicy,
-      createdAt: new Date(),
-    };
-
-    await this.occurrences.save(occurrence);
+    await this.occurrences.save(this.toStoredOccurrence(occurrence));
+    await this.eventPublisher.publish(event);
 
     return this.toResponse(occurrence, session);
   }
 
+  private rethrowDomainError(error: unknown): never {
+    if (error instanceof InvalidOccurrenceCategoryError) {
+      throw new BadRequestException({ code: 'INVALID_CATEGORY' });
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === 'Description contains disallowed personal data pattern'
+    ) {
+      throw new BadRequestException({ code: 'DOXXING_DETECTED' });
+    }
+
+    throw error;
+  }
+
+  private toStoredOccurrence(occurrence: Occurrence): StoredOccurrence {
+    return {
+      id: occurrence.id,
+      cityId: occurrence.cityId,
+      category: occurrence.category,
+      occurrenceKind: occurrence.occurrenceKind,
+      status: 'unverified',
+      confidenceLevel: occurrence.confidenceLevel as 0,
+      latitude: occurrence.storedMapLocation.latitude,
+      longitude: occurrence.storedMapLocation.longitude,
+      privacyLevel: occurrence.privacyLevel,
+      description: occurrence.description ?? undefined,
+      reputationId: occurrence.contributorRef.reputationId,
+      authorDisplayPolicy: occurrence.authorDisplayPolicy,
+      isSensitive: occurrence.isSensitive,
+      version: occurrence.version,
+      createdAt: occurrence.createdAt,
+    };
+  }
+
   private toResponse(
-    occurrence: StoredOccurrence,
+    occurrence: Occurrence,
     session: SessionClaims,
   ): CreateOccurrenceResponse {
     const response: CreateOccurrenceResponse = {
       id: occurrence.id,
       cityId: occurrence.cityId,
       category: occurrence.category,
-      status: occurrence.status,
-      confidenceLevel: occurrence.confidenceLevel,
-      latitude: occurrence.latitude,
-      longitude: occurrence.longitude,
+      status: 'unverified',
+      confidenceLevel: occurrence.confidenceLevel as 0,
+      latitude: occurrence.storedMapLocation.latitude,
+      longitude: occurrence.storedMapLocation.longitude,
       privacyLevel: occurrence.privacyLevel,
-      description: occurrence.description,
+      description: occurrence.description ?? undefined,
     };
 
     if (
