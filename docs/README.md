@@ -6,6 +6,8 @@ All project documentation **must be written in English**.
 
 | Guide | Description |
 |-------|-------------|
+| [Development setup](contributing/development-setup.md) | Local environment, git hooks, commands |
+| [Branches](contributing/branches.md) | Branch strategy, development flow, where to commit |
 | [Commits](contributing/commits.md) | Commit message format and git rules |
 | [Pull Requests](contributing/pull-requests.md) | PR template, review criteria, merge requirements |
 | [CI/CD](contributing/ci-cd.md) | Pipeline stages, deployment, and infrastructure |
@@ -17,11 +19,34 @@ All project documentation **must be written in English**.
 |-------|-------------|
 | [Governance](open-source/governance.md) | License, policies, branch protection, dependency rules |
 
+## Deployment
+
+| Guide | Description |
+|-------|-------------|
+| [Production](deployment/production.md) | Deploy checklist, architecture, rollback |
+| [Docker](deployment/docker.md) | Local infra, validation, pinned images |
+
 ## Architecture
 
 | Guide | Description |
 |-------|-------------|
-| [ADRs](adr/README.md) | Architecture Decision Records — how to write and store them |
+| [Technology stack](architecture/stack.md) | NestJS, PostgreSQL 18.1, Redis, clients |
+| [Monorepo structure](architecture/monorepo-structure.md) | Turborepo layout, Vertical Slice modules |
+| [ADRs](adr/README.md) | Architecture Decision Records |
+
+## Security
+
+| Guide | Description |
+|-------|-------------|
+| [Security docs](security/README.md) | Standards, OWASP-aligned controls, phase gate checklist |
+| [Phase gate checklist](security/phase-gate-checklist.md) | **Mandatory review before each development phase** |
+
+## System logic
+
+| Guide | Description |
+|-------|-------------|
+| [System docs](system/README.md) | Domain model, lifecycle, privacy, intelligence |
+| [Feature modules](features/README.md) | **Per-feature business rules, flows, DDD, and TDD plans** |
 
 ## Language policy
 

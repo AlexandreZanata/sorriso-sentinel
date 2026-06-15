@@ -1,0 +1,32 @@
+---
+description: Branch strategy, development flow, and where to commit
+alwaysApply: true
+---
+
+# Branches and development flow
+
+Full guide: `docs/contributing/branches.md`
+
+## Rules
+
+- **Never commit directly to `main`** — use topic branches + PR
+- Trunk-based: short-lived branches merge into `main` only
+- Branch naming: `<type>/<short-description>` in English (e.g. `feat/order-idempotency`)
+- Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`, `hotfix`
+- Releases: tag on `main` (`vX.Y.Z`), not a separate release branch
+- Keep topic branches synced with `main` via rebase when possible
+- Delete topic branch after PR merge
+
+## Standard flow
+
+```
+main → checkout -b feat/... → TDD + commits → push → PR to main → CI + review → merge → delete branch
+```
+
+## Commit destination
+
+| Work | Branch |
+|------|--------|
+| Any code/docs change | topic branch → PR → `main` |
+| Release | PR bumping VERSION/CHANGELOG on `main` → tag `vX.Y.Z` |
+| Hotfix | `hotfix/*` → PR → `main` → patch tag |

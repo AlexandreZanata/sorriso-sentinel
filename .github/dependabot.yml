@@ -9,11 +9,10 @@ updates:
       - dependencies
       - ci
 
-  # Uncomment when application stack is defined:
-  # - package-ecosystem: npm
-  #   directory: /
-  #   schedule:
-  #     interval: weekly
-  #   open-pull-requests-limit: 10
-  #   labels:
-  #     - dependencies
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies

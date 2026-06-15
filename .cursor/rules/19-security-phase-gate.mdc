@@ -1,0 +1,37 @@
+---
+description: Security phase gate — verify checklist before each feature phase and PR
+alwaysApply: true
+---
+
+# Security phase gate
+
+Before implementing or merging a feature phase, review [docs/security/phase-gate-checklist.md](../../docs/security/phase-gate-checklist.md).
+
+## Mandatory for every implementation PR
+
+1. Complete **Universal gates** in the phase gate checklist.
+2. Complete the **current phase section** (e.g. Phase 2 for Create Occurrence).
+3. Add integration tests for **401/403** and **cross-tenant** denial where routes are new or changed.
+4. Never weaken a layer documented in [security-chain-failures.md](../../docs/security/security-chain-failures.md).
+
+## Quick reference by topic
+
+| Topic | Doc |
+|-------|-----|
+| SQL injection | [sql-injection.md](../../docs/security/sql-injection.md) |
+| IDOR / access control | [idor-and-access-control.md](../../docs/security/idor-and-access-control.md) |
+| CORS / headers | [cors-and-http-security.md](../../docs/security/cors-and-http-security.md) |
+| Upload limits | [media-uploads.md](../../docs/security/media-uploads.md) — max **10 MB**/image |
+| AuthN / AuthZ | [authentication-authorization.md](../../docs/security/authentication-authorization.md) |
+| Rate limits | [rate-limiting-and-abuse.md](../../docs/security/rate-limiting-and-abuse.md) |
+| Secrets / logs | [secrets-logging-and-data.md](../../docs/security/secrets-logging-and-data.md) |
+
+## Agent behavior
+
+When starting a new vertical slice or phase:
+
+- Read the matching phase section in the checklist first.
+- Cite which gates were satisfied in the PR summary.
+- If a gate cannot be met yet, document the gap and do not mark the phase complete.
+
+Privacy rules in [docs/system/privacy-and-identity.md](../../docs/system/privacy-and-identity.md) are security requirements — not optional UX.

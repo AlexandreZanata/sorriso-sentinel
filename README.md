@@ -8,30 +8,55 @@ Open source monitoring and sentinel platform. Built with enterprise-grade archit
 
 ## Status
 
-Early development. Application stack and runtime are not defined yet. The repository currently provides governance, documentation, CI/CD scaffolding, and development standards.
+Early development. Stack and domain model are defined. Application monorepo scaffolding is next.
 
 ## Features (planned)
 
+- **Occurrence-centric domain** — one lifecycle for all report types
+- **Territorial memory** — historical intelligence per street, neighborhood, rural route
+- **Privacy by default** — anonymous contribution, optional identity, RLS
+- **Community validation** — consensus-based confidence, invisible trust scores
+- **City health** — neighborhood indicators and trend analytics
 - Enterprise architecture: Clean Architecture, DDD, Vertical Slice
-- Multitenancy-ready design
-- Structured observability (logging, tracing, health checks)
 - TDD-first development workflow
 - Full open source under Apache 2.0
+
+## Documentation
+
+| Topic | Link |
+|-------|------|
+| System logic | [docs/system/README.md](docs/system/README.md) |
+| Technology stack | [docs/architecture/stack.md](docs/architecture/stack.md) |
+| All docs | [docs/README.md](docs/README.md) |
 
 ## Quick start
 
 ```bash
 git clone https://github.com/AlexandreZanata/sorriso-sentinel.git
 cd sorriso-sentinel
+nvm use          # optional — matches .nvmrc (Node 20+)
+make setup       # install deps, git hooks, validate
+cp .env.example .env
+make docker-up   # optional — Postgres, Redis, MinIO
 ```
 
-Application setup instructions will be added when the stack is chosen.
+Create a topic branch before making changes — see [development setup](docs/contributing/development-setup.md).
+
+```bash
+git checkout main && git pull origin main
+git checkout -b feat/your-feature
+make check       # run before opening a PR
+```
+
+Application runtime setup will be added when the stack is chosen.
 
 ## Documentation
 
 | Topic | Link |
 |-------|------|
 | All docs | [docs/README.md](docs/README.md) |
+| Development setup | [docs/contributing/development-setup.md](docs/contributing/development-setup.md) |
+| Branches & workflow | [docs/contributing/branches.md](docs/contributing/branches.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Versioning | [docs/contributing/versioning.md](docs/contributing/versioning.md) |
 | Open source governance | [docs/open-source/governance.md](docs/open-source/governance.md) |

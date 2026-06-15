@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Nothing yet.
+- Local development environment: Node tooling, Husky git hooks, commitlint, Makefile
+- `docs/contributing/development-setup.md` and `docs/contributing/branches.md`
+- CI parity via `npm run validate` and `make check`
+- Turborepo monorepo: domain, shared, geo, database packages + api, worker, web, mobile apps
+- Docker Compose for Postgres 18 (PostGIS), Redis, MinIO — pinned images, `docker:validate` in CI
+- Production and Docker deployment docs (`docs/deployment/`)
+- Expo SDK 54 (React Native 0.81, React 19.1)
+- Fix markdownlint scanning nested `node_modules` in workspaces
 
 ## [0.1.0] - 2026-06-15
 

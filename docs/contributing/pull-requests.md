@@ -12,6 +12,7 @@ All PR titles, descriptions, and review comments on code **must be written in En
 - [ ] No secrets or sensitive files included
 - [ ] Code, comments, and docs are English-only
 - [ ] ADR added in `docs/adr/` if an architecture decision was made
+- [ ] [Security phase gate](../security/phase-gate-checklist.md) completed for current phase (universal gates + phase section)
 
 ## PR title
 
@@ -33,10 +34,18 @@ feat(orders): add idempotent order creation endpoint
 - [ ] Integration tests pass
 - [ ] Manual verification steps (if any)
 
+## Security
+- Phase gate sections completed: <!-- e.g. Universal + Phase 2 -->
+- [ ] Authorization tested (401/403)
+- [ ] Tenant isolation verified
+- [ ] No new SQL injection surface ([sql-injection](../security/sql-injection.md))
+- [ ] IDOR / object-level access reviewed ([idor](../security/idor-and-access-control.md))
+- [ ] Rate limits considered for new public endpoints
+
 ## Checklist
 - [ ] English-only code and comments
 - [ ] No N+1 / query count reviewed for new endpoints
-- [ ] Security considerations addressed (auth, validation, OWASP)
+- [ ] Security considerations addressed — see [security docs](../security/README.md)
 - [ ] Tenant isolation verified (if applicable)
 ```
 
@@ -49,7 +58,7 @@ Reviewers and agents should verify:
 | Architecture | Vertical Slice, ports/adapters, domain isolation |
 | Database | Soft delete, audit, constraints, query count per route |
 | Code quality | Complexity ≤ 10, functions ≤ 40 lines, no king files |
-| Security | RBAC, input validation, no sensitive data in logs |
+| Security | Phase gate, IDOR, SQLi, CORS, upload limits, chain failures — [security/](../security/README.md) |
 | Tests | Behavior-named tests, Red-Green-Refactor followed |
 | Language | All artifacts in English |
 

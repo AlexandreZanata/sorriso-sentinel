@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Sorriso Sentinel",
+    "slug": "sorriso-sentinel",
+    "version": "0.1.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "scheme": "sorriso-sentinel",
+    "platforms": ["ios", "android"],
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true
+  }
+}

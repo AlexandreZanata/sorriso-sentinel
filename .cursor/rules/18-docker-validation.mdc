@@ -1,0 +1,36 @@
+---
+description: Docker validation required for infra and data-dependent features
+alwaysApply: true
+---
+
+# Docker validation
+
+Full guides: `docs/deployment/docker.md`, `docs/deployment/production.md`
+
+## When required
+
+Run `npm run docker:validate` before opening a PR when changes touch:
+
+- `docker/` (compose, Dockerfiles, init scripts)
+- `packages/database/` (migrations, schema)
+- API or worker database/Redis/queue integrations
+- Any new feature depending on Postgres, Redis, or MinIO
+
+## Commands
+
+```bash
+make docker-up        # start local infra
+npm run docker:validate  # full health check + teardown
+make check            # includes docker:validate
+```
+
+## Image standards
+
+- Pin image versions — never `latest` in committed compose files
+- Alpine/slim base images where possible
+- Non-root user in production Dockerfiles
+- Health checks on every service
+- Memory limits defined
+- Dev ports bound to `127.0.0.1` only
+
+Pre-commit runs `validate` (fast). `docker:validate` runs in `make check` and CI.

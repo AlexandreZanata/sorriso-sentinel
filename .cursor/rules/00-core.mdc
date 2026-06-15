@@ -1,16 +1,27 @@
 ---
-description: Core principles, project context, and agent workflow
+description: Core principles, project context, domain model, and agent workflow
 alwaysApply: true
 ---
 
 # Context — Sorriso Sentinel
 
-- **Stack**: define at project start (language, framework, ORM)
-- **Type**: define (e.g. API, multi-tenant SaaS, modular monolith)
-- **Database**: define (e.g. PostgreSQL)
-- **Ubiquitous Language**: English for domain terms; keep consistent across code, tests, and docs
+- **Stack**: TypeScript, NestJS, PostgreSQL 18.1 (UUID v7, PostGIS, TimescaleDB), Redis, BullMQ, Next.js, React Native, Turborepo
+- **Type**: Multi-tenant civic intelligence platform (modular monolith)
+- **Database**: PostgreSQL 18.1 + PostGIS + TimescaleDB + RLS
+- **Ubiquitous Language**: English — `Occurrence`, `Contributor`, `ReputationId`, `TrustScore`, `Place`, `CityHealth`
 
-Update this section when the stack is defined.
+Docs: `docs/system/`, `docs/architecture/stack.md`
+
+## Central aggregate
+
+**Occurrence** — all report types share one lifecycle. Category is metadata, not a separate aggregate.
+
+## Domain non-negotiables
+
+- Anonymity default; identity optional (`docs/system/privacy-and-identity.md`)
+- Never store contributor location — only problem location
+- Server-side photo anonymization before storage
+- Sensitive categories: author never displayed
 
 # General principles
 
