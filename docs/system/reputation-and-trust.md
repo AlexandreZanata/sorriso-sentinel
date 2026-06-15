@@ -45,6 +45,8 @@ Reliability: 92%
 
 Trust score influences validation weight (Principle 8 — invisible trust) but is never exposed as a leaderboard of real names.
 
+> **Implementation detail:** [Reputation feature module](../features/reputation/README.md) — scoring, trust weight, public labels, TDD plan.
+
 ## Local specialists
 
 The system identifies expertise from patterns:
@@ -100,5 +102,6 @@ Traditional auth (email/password) remains optional for Public mode users.
 
 ## Related docs
 
+- [Reputation feature module](../features/reputation/README.md) — detailed business rules and TDD
 - [Privacy and identity](privacy-and-identity.md)
 - [Occurrence lifecycle](occurrence-lifecycle.md) — validation and confidence

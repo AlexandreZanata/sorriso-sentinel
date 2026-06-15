@@ -44,6 +44,7 @@ Anonymity (Identity & Privacy)
     ├── constrains visibility in ──▶ Validation (comments, confirms)
     ├── triggers rules in ──────────▶ Media (EXIF strip — worker)
     └── enforced by ────────────────▶ Security (RLS, audit roles)
+    └── creates profile in ─────────▶ [Reputation](../reputation/README.md)
 ```
 
 Principles 1–5, 7, 11–15 from [privacy and identity](../../system/privacy-and-identity.md) are **implemented here**. Principles 6 (photos) and 8–10 (trust/consensus/encryption) belong to sibling modules but **anonymity defines the constraints they must respect**.

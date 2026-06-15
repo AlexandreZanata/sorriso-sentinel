@@ -39,7 +39,7 @@ Raw reports are unreliable. Community validation turns isolated claims into **tr
 ```text
 Anonymity ──────────▶ ContributorRef, ContentPolicy, display rules
 Occurrence creation ▶ Occurrence aggregate (target of validation)
-Reputation (port) ──▶ TrustWeight lookup (stub ok in v1)
+Reputation (port) ──▶ TrustWeight + public label — [reputation module](../reputation/README.md)
 Community validation (this module)
      │
      ├──▶ emits OccurrenceConfirmed / Denied / ConfidenceChanged

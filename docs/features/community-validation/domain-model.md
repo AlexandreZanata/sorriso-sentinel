@@ -8,7 +8,7 @@ Collaborates with: **Occurrences** aggregate (confirm/deny mutate occurrence sta
 ```text
 ┌─────────────────┐     TrustWeight      ┌─────────────────┐
 │   Reputation    │◀────────────────────│   Validation    │
-│   (future)      │                      │  (this module)  │
+│  [reputation](../reputation/README.md) │                  │  (this module)  │
 └─────────────────┘                      └────────┬────────┘
                                                 │
          ContributorRef                         │ recordConfirmation/Denial
@@ -157,7 +157,7 @@ INV-V2.
 | `ValidationVoteRepository` | `save`, `findByOccurrence`, `exists` | Drizzle |
 | `OccurrenceRepository` | `findByIdForUpdate`, `save` | existing |
 | `OccurrenceCommentRepository` | `save`, `listByOccurrence` | Drizzle |
-| `ReputationPort` | `getTrustWeight(reputationId)` | Stub → 1.0 until Reputation module |
+| `ReputationPort` | `getTrustWeight`, `getPublicLabel` | [Reputation module](../reputation/domain-model.md) |
 | `ValidationPolicyPort` | `getPolicy(cityId, category)` | Config JSON / DB |
 | `ContentPolicyPort` | `validateUserText` | Shared with Anonymity |
 | `ContributorResolverPort` | `resolve(session)` | Identity |
@@ -301,7 +301,7 @@ packages/domain/src/occurrences/
 |--------|----------|
 | Occurrence creation | Occurrence must exist in `unverified` or later state |
 | Anonymity | `ContributorRef`, `ContentPolicyPort`, sensitive display |
-| Reputation | `ReputationPort.getTrustWeight` — stub 1.0 until implemented |
+| Reputation | `ReputationPort` — see [reputation module](../reputation/README.md) |
 | Media (future) | Evidence does not replace votes; may boost weight v2 |
 
 ---

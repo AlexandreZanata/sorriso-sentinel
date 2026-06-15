@@ -13,7 +13,7 @@ Package root: `packages/domain/src/identity/`
           │ events
           ▼
 ┌─────────────────────┐
-│    Reputation       │  consumes ReputationIdentityAssigned
+│    Reputation       │  consumes ReputationIdentityAssigned — [reputation module](../reputation/README.md)
 └─────────────────────┘
 ```
 
