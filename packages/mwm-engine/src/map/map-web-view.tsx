@@ -21,18 +21,21 @@ export function MapWebView({
 }: MapWebViewProps) {
   const webViewRef = useRef<WebView>(null);
   const html = useMemo(() => buildMapHtml(), []);
+  const pinsRef = useRef(pins);
+
+  pinsRef.current = pins;
+
+  const injectPins = useCallback(() => {
+    const payload = JSON.stringify(pinsRef.current);
+    webViewRef.current?.injectJavaScript(`window.updatePins(${payload}); true;`);
+  }, []);
 
   useEffect(() => {
-    const payload = JSON.stringify(pins);
-    webViewRef.current?.injectJavaScript(`window.updatePins(${payload}); true;`);
-  }, [pins]);
+    injectPins();
+  }, [pins, injectPins]);
 
   const handleMessage = useCallback(
     (event: { nativeEvent: { data: string } }) => {
-      if (!onBoundsChange) {
-        return;
-      }
-
       try {
         const parsed = JSON.parse(event.nativeEvent.data) as {
           type?: string;
@@ -41,6 +44,15 @@ export function MapWebView({
           minLongitude?: number;
           maxLongitude?: number;
         };
+
+        if (parsed.type === 'ready') {
+          injectPins();
+          return;
+        }
+
+        if (!onBoundsChange) {
+          return;
+        }
 
         if (
           parsed.type !== 'bounds' ||
@@ -62,7 +74,7 @@ export function MapWebView({
         return;
       }
     },
-    [onBoundsChange],
+    [injectPins, onBoundsChange],
   );
 
   return (
@@ -78,10 +90,7 @@ export function MapWebView({
       setSupportMultipleWindows={false}
       mixedContentMode="always"
       onMessage={handleMessage}
-      onLoadEnd={() => {
-        const payload = JSON.stringify(pins);
-        webViewRef.current?.injectJavaScript(`window.updatePins(${payload}); true;`);
-      }}
+      onLoadEnd={injectPins}
     />
   );
 }

@@ -64,12 +64,32 @@ export function buildMapHtml(
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
       let markers = [];
+      let pendingPins = [];
 
       function clearMarkers() {
         for (const marker of markers) {
           marker.remove();
         }
         markers = [];
+      }
+
+      function applyPins(pins) {
+        clearMarkers();
+        for (const pin of pins || []) {
+          const element = document.createElement('div');
+          element.className = 'occurrence-marker';
+          element.title = pin.category + ' · ' + pin.status;
+          const marker = new maplibregl.Marker({ element })
+            .setLngLat([pin.longitude, pin.latitude])
+            .addTo(map);
+          markers.push(marker);
+        }
+      }
+
+      function notifyReady() {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
+        }
       }
 
       function postBounds() {
@@ -88,16 +108,11 @@ export function buildMapHtml(
       }
 
       window.updatePins = function updatePins(pins) {
-        clearMarkers();
-        for (const pin of pins || []) {
-          const element = document.createElement('div');
-          element.className = 'occurrence-marker';
-          element.title = pin.category + ' · ' + pin.status;
-          const marker = new maplibregl.Marker({ element })
-            .setLngLat([pin.longitude, pin.latitude])
-            .addTo(map);
-          markers.push(marker);
+        pendingPins = pins || [];
+        if (!map.loaded()) {
+          return;
         }
+        applyPins(pendingPins);
       };
 
       window.setMapCenter = function setMapCenter(latitude, longitude, zoomLevel) {
@@ -107,9 +122,12 @@ export function buildMapHtml(
         });
       };
 
-      map.on('load', postBounds);
+      map.on('load', () => {
+        applyPins(pendingPins);
+        postBounds();
+        notifyReady();
+      });
       map.on('moveend', postBounds);
-      window.updatePins([]);
     </script>
   </body>
 </html>`;
