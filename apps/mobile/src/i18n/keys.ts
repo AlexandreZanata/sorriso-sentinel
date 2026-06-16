@@ -16,6 +16,20 @@ export const I18N_KEYS = {
   map: {
     placeholder: 'map.placeholder',
     loadError: 'map.loadError',
+    download: {
+      preparing: 'map.download.preparing',
+      title: 'map.download.title',
+      explanation: 'map.download.explanation',
+      offlineBadge: 'map.download.offlineBadge',
+      sizeLabel: 'map.download.sizeLabel',
+      sizePending: 'map.download.sizePending',
+      progressLabel: 'map.download.progressLabel',
+      bytesLabel: 'map.download.bytesLabel',
+      action: 'map.download.action',
+      downloading: 'map.download.downloading',
+      retry: 'map.download.retry',
+      failed: 'map.download.failed',
+    },
   },
   occurrence: {
     create: {
