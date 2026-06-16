@@ -22,7 +22,7 @@ Read `GET /occurrences/:id/comments`; compose via `POST /occurrences/:id/comment
 
 ## MapViewport
 
-MapLibre GL native view, occurrence pin layer, user location (problem pins only — never contributor GPS).
+Native `.mwm` engine view (`@sorriso-sentinel/mwm-engine`) with occurrence pin layer and region download control. User location remains limited to problem pins only — never contributor GPS.
 
 | Concern | Detail |
 |---------|--------|
@@ -57,7 +57,7 @@ Orchestrates presigned slot flow:
 | OccurrenceList | planned |
 | OccurrenceDetailHeader | planned |
 | CommentThread | planned |
-| MapViewport | planned |
+| MapViewport | in progress |
 | SessionBootstrapGate | planned |
 | LoginForm | planned |
 | ProfileHeader | planned |

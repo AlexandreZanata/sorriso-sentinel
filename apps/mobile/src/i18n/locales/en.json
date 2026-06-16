@@ -8,6 +8,7 @@
   "tabs.report": "Report",
   "tabs.settings": "Settings",
   "map.placeholder": "Map view coming soon",
+  "map.loadError": "Could not load map occurrences.",
   "occurrence.create.title": "Report a problem",
   "occurrence.create.placeholder": "Occurrence form coming soon",
   "settings.title": "Settings",

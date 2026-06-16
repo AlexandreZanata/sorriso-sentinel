@@ -2,7 +2,15 @@
 
 React Native + Expo SDK 54 client (`apps/mobile`). These docs define **structure, i18n, UI composition, and API integration** before feature implementation.
 
-**Status:** in implementation — foundation (i18n, theme, bootstrap, tabs) landed; map and occurrence flows next.
+**Status:** in implementation — foundation (i18n, theme, bootstrap, tabs) landed; native `.mwm` map engine and occurrence map pins in progress.
+
+## Agent reference — CoMaps
+
+For map engine work (`.mwm` download, storage, native render), agents must treat this local tree as the reference implementation:
+
+`/data/dev/projects/webstorm/comaps/`
+
+See also [`apps/mobile/README.md`](../../apps/mobile/README.md#agent-reference--comaps-mwm-engine).
 
 ## Document set
 

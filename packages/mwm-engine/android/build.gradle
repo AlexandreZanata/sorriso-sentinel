@@ -1,0 +1,19 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.sorrisosentinel.mwmengine'
+version = '0.1.0'
+
+android {
+  namespace "com.sorrisosentinel.mwmengine"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}
+
+dependencies {
+  // No explicit dependency on expo-modules-core; provided by Expo autolinking.
+}

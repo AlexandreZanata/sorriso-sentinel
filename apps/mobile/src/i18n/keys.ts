@@ -15,6 +15,7 @@ export const I18N_KEYS = {
   },
   map: {
     placeholder: 'map.placeholder',
+    loadError: 'map.loadError',
   },
   occurrence: {
     create: {

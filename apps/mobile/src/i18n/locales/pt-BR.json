@@ -8,6 +8,7 @@
   "tabs.report": "Reportar",
   "tabs.settings": "Configurações",
   "map.placeholder": "Visualização do mapa em breve",
+  "map.loadError": "Não foi possível carregar as ocorrências no mapa.",
   "occurrence.create.title": "Reportar um problema",
   "occurrence.create.placeholder": "Formulário de ocorrência em breve",
   "settings.title": "Configurações",
