@@ -8,6 +8,7 @@ import { SessionBootstrapGate } from '../../../ui/organisms/session-bootstrap-ga
 import { Spinner } from '../../../ui/atoms/spinner';
 import { resolveBootstrapErrorMessage } from '../bootstrap-session.errors';
 import { runSessionBootstrap } from '../bootstrap-session.service';
+import { resetApiBaseUrlCache } from '../../../api/resolve-api-base-url';
 import { MainTabs } from '../../../navigation/main-tabs';
 
 function LoadingScreen() {
@@ -27,6 +28,7 @@ export function SessionGate() {
   const bootstrap = useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
+    resetApiBaseUrlCache();
 
     try {
       const token = await runSessionBootstrap();

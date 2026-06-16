@@ -1,4 +1,4 @@
-export const DEFAULT_API_URL = 'http://127.0.0.1:3010';
+export const DEFAULT_API_URL = 'http://172.19.2.162:3010';
 export const DEFAULT_CITY_ID = '01932f1a-0000-7000-8000-000000000001';
 export const CORRELATION_ID_HEADER = 'x-correlation-id';
 
