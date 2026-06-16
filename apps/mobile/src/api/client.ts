@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { ApiError, mapStatusToI18nKey } from './errors';
-import { CORRELATION_ID_HEADER, getApiBaseUrl } from './config';
+import { CORRELATION_ID_HEADER } from './config';
+import { resolveApiBaseUrl } from './resolve-api-base-url';
 
 export type ApiAuthMode = 'session' | 'jwt' | 'none';
 
@@ -33,7 +34,8 @@ export async function apiRequest<T>(
     headers['x-city-id'] = options.cityId;
   }
 
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const baseUrl = await resolveApiBaseUrl();
+  const response = await fetch(`${baseUrl}${path}`, {
     method: options.method ?? 'GET',
     headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),

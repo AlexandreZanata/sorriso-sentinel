@@ -4,7 +4,7 @@ help:
 	@echo "Sorriso Sentinel — development commands"
 	@echo ""
 	@echo "  make setup       Install deps and configure git hooks"
-  @echo "  make check       Full local validation (branch + CI parity + prod docker)"
+	@echo "  make check       Full local validation (branch + CI parity + prod docker)"
 	@echo "  make validate    OSS + version + lint + test + build"
 	@echo "  make lint        Lint markdown + all packages"
 	@echo "  make test        Run all package tests"
