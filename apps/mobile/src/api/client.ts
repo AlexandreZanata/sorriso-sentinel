@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { ApiError, mapStatusToI18nKey } from './errors';
 import { CORRELATION_ID_HEADER, getApiBaseUrl } from './config';
 
@@ -12,7 +13,7 @@ export interface ApiRequestOptions {
 }
 
 function buildCorrelationId(): string {
-  return globalThis.crypto.randomUUID();
+  return Crypto.randomUUID();
 }
 
 export async function apiRequest<T>(
@@ -39,7 +40,20 @@ export async function apiRequest<T>(
   });
 
   const text = await response.text();
-  const payload = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  let payload: Record<string, unknown> = {};
+
+  if (text) {
+    try {
+      payload = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      throw new ApiError(
+        response.status,
+        'INVALID_JSON',
+        'Invalid JSON response from server',
+        'errors.networkUnavailable',
+      );
+    }
+  }
 
   if (!response.ok) {
     const code =
