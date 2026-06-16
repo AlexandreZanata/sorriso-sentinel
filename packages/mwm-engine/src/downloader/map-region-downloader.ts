@@ -17,6 +17,10 @@ import {
   MWM_ENGINE_APP_VERSION,
   MWM_FILE_EXTENSION,
 } from './constants';
+import {
+  buildCoMapsRegionDirectory,
+  buildCoMapsRegionFilePath,
+} from './comaps-storage';
 import { joinUrl } from './join-url';
 import { parseCountriesCatalog } from './parse-countries-catalog';
 import { parseMetaConfig } from './parse-meta-config';
@@ -39,33 +43,39 @@ export class MapRegionDownloader {
   }
 
   async listInstalledRegions(): Promise<MwmRegionDescriptor[]> {
-    const storageDir = this.getStorageDirectory();
-
-    if (!storageDir) {
-      return [];
-    }
-
-    const entries = await FileSystem.readDirectoryAsync(storageDir).catch(() => []);
     const regions: MwmRegionDescriptor[] = [];
+    const seen = new Set<string>();
 
-    for (const entry of entries) {
-      if (!entry.endsWith(MWM_FILE_EXTENSION)) {
-        continue;
+    const roots = this.getStorageRoots();
+
+    for (const root of roots) {
+      const entries = await FileSystem.readDirectoryAsync(root.path).catch(() => []);
+
+      for (const entry of entries) {
+        if (!entry.endsWith(MWM_FILE_EXTENSION)) {
+          continue;
+        }
+
+        const regionId = entry.slice(0, -MWM_FILE_EXTENSION.length);
+
+        if (seen.has(regionId)) {
+          continue;
+        }
+
+        const info = await FileSystem.getInfoAsync(`${root.path}/${entry}`);
+
+        if (!info.exists || typeof info.size !== 'number') {
+          continue;
+        }
+
+        seen.add(regionId);
+        regions.push({
+          id: regionId,
+          name: regionId,
+          sizeBytes: info.size,
+          version: root.dataVersion,
+        });
       }
-
-      const regionId = entry.slice(0, -MWM_FILE_EXTENSION.length);
-      const info = await FileSystem.getInfoAsync(`${storageDir}/${entry}`);
-
-      if (!info.exists || typeof info.size !== 'number') {
-        continue;
-      }
-
-      regions.push({
-        id: regionId,
-        name: regionId,
-        sizeBytes: info.size,
-        version: this.catalogDataVersion,
-      });
     }
 
     return regions;
@@ -102,8 +112,9 @@ export class MapRegionDownloader {
     });
 
     const storageDir = this.getStorageDirectory();
+    const targetPath = this.getRegionFilePath(regionId);
 
-    if (!storageDir) {
+    if (!storageDir || !targetPath) {
       this.setProgress(regionId, {
         regionId,
         downloadedBytes: 0,
@@ -115,7 +126,6 @@ export class MapRegionDownloader {
 
     await FileSystem.makeDirectoryAsync(storageDir, { intermediates: true });
 
-    const targetPath = `${storageDir}/${regionId}${MWM_FILE_EXTENSION}`;
     const urls = buildMwmDownloadUrls(this.servers, regionId, this.catalogDataVersion);
     const downloaded = await this.downloadWithFailover(
       regionId,
@@ -334,7 +344,48 @@ export class MapRegionDownloader {
       return null;
     }
 
-    return `${FileSystem.documentDirectory}${this.options.writablePath}`;
+    return buildCoMapsRegionDirectory(
+      FileSystem.documentDirectory,
+      this.getDataVersion(),
+    );
+  }
+
+  private getRegionFilePath(regionId: string): string | null {
+    if (!this.options || !FileSystem.documentDirectory) {
+      return null;
+    }
+
+    return buildCoMapsRegionFilePath(
+      FileSystem.documentDirectory,
+      this.getDataVersion(),
+      regionId,
+    );
+  }
+
+  private getStorageRoots(): Array<{ path: string; dataVersion: number }> {
+    if (!this.options || !FileSystem.documentDirectory) {
+      return [];
+    }
+
+    const dataVersion = this.getDataVersion();
+    const documentDirectory = FileSystem.documentDirectory;
+    const roots: Array<{ path: string; dataVersion: number }> = [
+      {
+        path: buildCoMapsRegionDirectory(documentDirectory, dataVersion),
+        dataVersion,
+      },
+    ];
+
+    if (this.options.writablePath) {
+      roots.push({
+        path: `${documentDirectory}${this.options.writablePath}/`,
+        dataVersion,
+      });
+    }
+
+    return roots.filter(
+      (root, index, all) => all.findIndex((entry) => entry.path === root.path) === index,
+    );
   }
 
   private setProgress(regionId: string, progress: MwmDownloadProgress): void {

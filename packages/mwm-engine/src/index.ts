@@ -1,4 +1,5 @@
 export * from './types';
+export * from './types/place-page';
 export * from './module';
 export * from './mwm-map-view';
 export * from './map/map-web-view';

@@ -21,13 +21,11 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
-    "expo-crypto": "^15.0.9",
     "expo-modules-core": "^3.0.30",
     "typescript": "^5.8.3",
     "vitest": "^3.2.1"
   },
   "peerDependencies": {
-    "expo-crypto": "*",
     "expo-file-system": "*",
     "expo-modules-core": "*",
     "react": "*",

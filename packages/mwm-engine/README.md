@@ -4,9 +4,9 @@ Native `.mwm` map engine bridge package for mobile.
 
 ## Scope
 
-- **Download (TypeScript):** CoMaps/OM metaserver + CDN failover, `countries.txt` catalog, resumable `.mwm` download with SHA-1 verification — mirrors `libs/storage/` and `libs/platform/downloader_utils.cpp` from CoMaps.
-- **Render (React):** `MwmMapView` uses MapLibre GL JS in a `WebView` with OSM raster tiles, viewport bounds sync, and occurrence pin overlays. Offline `.mwm` files download in the background for future native Drape integration.
-- **Native scaffold:** Kotlin/Swift/C++ stubs remain for a future full CoMaps `drape_frontend` bridge.
+- **Download (TypeScript):** CoMaps/OM metaserver + CDN failover, `countries.txt` catalog, resumable `.mwm` download with SHA-1 verification — mirrors `libs/storage/` from CoMaps. Files stored at `{documents}/{dataVersion}/{Region}.mwm` (same layout as CoMaps).
+- **Render (interim):** `MwmMapView` uses MapLibre GL JS + OSM raster tiles in a `WebView`. **Does not read `.mwm`** — true CoMaps vector render requires native `drape_frontend` (see ADR-0005, `docs/mobile/comaps-integration.md`).
+- **Place page (planned):** `MwmPlacePage` types mirror `place_page::Info`; native POI tap wiring is Phase 3.
 
 ## Platform
 
