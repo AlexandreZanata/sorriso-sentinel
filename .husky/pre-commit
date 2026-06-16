@@ -1,2 +1,2 @@
-npm run validate:branch
-npm run validate
+pnpm run validate:branch
+pnpm run validate

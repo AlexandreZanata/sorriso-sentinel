@@ -9,7 +9,7 @@ Full guides: `docs/deployment/docker.md`, `docs/deployment/production.md`
 
 ## When required
 
-Run `npm run docker:validate` before opening a PR when changes touch:
+Run `pnpm run docker:validate` before opening a PR when changes touch:
 
 - `docker/` (compose, Dockerfiles, init scripts)
 - `packages/database/` (migrations, schema)
@@ -20,7 +20,7 @@ Run `npm run docker:validate` before opening a PR when changes touch:
 
 ```bash
 make docker-up        # start local infra
-npm run docker:validate  # full health check + teardown
+pnpm run docker:validate  # full health check + teardown
 make check            # includes docker:validate
 ```
 

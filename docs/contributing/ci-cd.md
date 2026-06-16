@@ -10,7 +10,7 @@ Pipeline configuration and all CI-related documentation **must be written in Eng
 | Unit tests | Domain and application logic | Yes |
 | Integration tests | Repos, adapters, DB (Test Containers) | Yes |
 | Build | Compile/bundle artifacts | Yes |
-| Security scan | Dependencies (`npm audit --omit=dev`) | Yes (high/critical) |
+| Security scan | Dependencies (`pnpm audit --prod`) | Yes (high/critical) |
 
 ## Branch strategy
 
@@ -81,8 +81,8 @@ See [development-setup.md](development-setup.md) for full local environment setu
 When the application stack is defined, extend with:
 
 ```bash
-# npm run lint && npm test && npm run build
-# docker compose up -d && npm run test:integration
+# pnpm run lint && pnpm test && pnpm run build
+# docker compose up -d && pnpm run test:integration
 ```
 
 ## CI file location

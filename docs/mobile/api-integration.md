@@ -85,7 +85,7 @@ When API routes change:
 1. Update `packages/shared/src/api-docs/api-spec.ts`
 2. Update [api-routes.md](api-routes.md) mobile column
 3. Update route adapter module
-4. Run `npm run docker:api-routes`
+4. Run `pnpm run docker:api-routes`
 
 ## Related docs
 

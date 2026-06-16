@@ -8,7 +8,7 @@ compose_api="docker/docker-compose.api.yml"
 project="${COMPOSE_PROJECT:-sentinel-routes}"
 api_url="${API_URL:-http://127.0.0.1:3010}"
 city_id="01932f1a-0000-7000-8000-000000000001"
-session_secret="${SESSION_TOKEN_SECRET:-dev-session-secret-change-me}"
+session_secret="${SESSION_TOKEN_SECRET:-docker-validate-session-secret-not-dev}"
 local_key_ref="fingerprint-docker-routes-$(date +%s)"
 pseudonym="RtUser$(printf '%x' "${RANDOM}")"
 passed=0
@@ -59,7 +59,7 @@ for migration in "${migrations_dir}"/0*.sql; do
 done
 
 echo "==> Starting API (after migrations and sentinel_app role)"
-docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --build --wait api
+bash "${root}/scripts/docker-api-up.sh"
 sleep 3
 
 echo ""

@@ -10,6 +10,9 @@ project="${COMPOSE_PROJECT:-sentinel-prod-validate}"
 timeout="${DOCKER_WAIT_TIMEOUT:-180}"
 version="$(tr -d '[:space:]' < VERSION)"
 
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "ERROR: Docker is required but not installed."
   exit 1
@@ -81,7 +84,7 @@ rls_hidden="$(echo "${rls_hidden}" | grep -E '^[0-9]+$' | tail -1)"
 [[ "${rls_hidden}" == "0" ]] || { echo "ERROR: sensitive row visible in staging RLS check (got ${rls_hidden})"; exit 1; }
 
 echo "==> Starting production API (image tag ${VERSION})"
-docker compose -f "${compose_base}" -f "${compose_prod}" -p "${project}" up -d --wait --timeout "${timeout}" api
+docker compose -f "${compose_base}" -f "${compose_prod}" -p "${project}" up -d --build --wait --timeout "${timeout}" api
 
 echo "==> Security headers on /health"
 headers="$(curl -sI "http://127.0.0.1:3000/health")"

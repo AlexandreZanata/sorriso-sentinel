@@ -9,8 +9,12 @@ project="${COMPOSE_PROJECT:-sentinel}"
 api_url="${API_URL:-http://127.0.0.1:3010}"
 city_id="01932f1a-0000-7000-8000-000000000001"
 
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 echo "==> Starting Postgres, Redis, MinIO, and API"
-docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --build --wait
+docker compose -f "${compose_base}" -f "${compose_api}" -p "${project}" up -d --wait postgres redis minio
+bash "${root}/scripts/docker-api-up.sh"
 
 cleanup() {
   echo "==> Stopping stack"

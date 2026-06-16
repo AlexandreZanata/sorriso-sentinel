@@ -30,16 +30,18 @@ Docker is the standard way to run infrastructure locally and validate new featur
 ```bash
 cp .env.example .env
 make docker-up
-# or: npm run docker:up
+# or: pnpm run docker:up
 ```
 
 ## Validate (required before PR when touching infra/DB/API)
 
 ```bash
 make docker-validate
-# or: npm run docker:validate
-npm run docker:prod-validate   # Phase 8 — production overlay, headers, CORS, RLS staging
+# or: pnpm run docker:validate
+pnpm run docker:prod-validate   # Phase 8 — production overlay, headers, CORS, RLS staging
 ```
+
+**API image cache:** `docker:api-routes` reuses `sorriso-sentinel/api:local` when present. Rebuild with `FORCE_DOCKER_API_BUILD=1 pnpm run docker:api-routes`. Docker builds use BuildKit, `turbo prune`, and pnpm store cache mounts.
 
 This script:
 
@@ -94,7 +96,7 @@ make docker-up
 
 ### Health check timeout
 
-Increase wait: `DOCKER_WAIT_TIMEOUT=180 npm run docker:validate`
+Increase wait: `DOCKER_WAIT_TIMEOUT=180 pnpm run docker:validate`
 
 ## Related docs
 
