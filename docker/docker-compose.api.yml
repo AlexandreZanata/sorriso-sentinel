@@ -43,7 +43,7 @@ services:
       PRESIGNED_URL_TTL_SECONDS: ${PRESIGNED_URL_TTL_SECONDS:-900}
       MEDIA_PROCESS_INLINE: ${MEDIA_PROCESS_INLINE:-true}
     ports:
-      - '127.0.0.1:3010:3000'
+      - '3010:3000'
     depends_on:
       postgres:
         condition: service_healthy
