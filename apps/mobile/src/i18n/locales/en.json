@@ -22,6 +22,7 @@
   "map.download.retry": "Try download again",
   "map.download.failed": "Map download failed. Check your connection and try again.",
   "map.download.background": "Downloading offline maps… {percent}%",
+  "map.download.backgroundFailed": "Offline map download paused. The online map remains available.",
   "occurrence.create.title": "Report a problem",
   "occurrence.create.placeholder": "Occurrence form coming soon",
   "settings.title": "Settings",

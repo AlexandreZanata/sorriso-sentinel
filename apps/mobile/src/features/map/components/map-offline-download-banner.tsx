@@ -18,18 +18,12 @@ export function MapOfflineDownloadBanner({
 }: MapOfflineDownloadBannerProps) {
   const { t } = useTranslation();
 
-  if (isInstalled || progress.status === 'finished') {
+  if (isInstalled || progress.status === 'finished' || progress.status === 'failed') {
     return null;
   }
 
-  if (progress.status === 'failed') {
-    return (
-      <View style={styles.banner}>
-        <Text variant="caption" color="danger">
-          {t(I18N_KEYS.map.download.failed)}
-        </Text>
-      </View>
-    );
+  if (progress.status !== 'downloading' && progress.status !== 'queued') {
+    return null;
   }
 
   const totalBytes = progress.totalBytes || 0;

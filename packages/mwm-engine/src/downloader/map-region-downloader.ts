@@ -305,7 +305,12 @@ export class MapRegionDownloader {
 
       const info = await FileSystem.getInfoAsync(result.uri);
 
-      return info.exists && typeof info.size === 'number' && info.size === totalBytes;
+      if (!info.exists || typeof info.size !== 'number' || info.size !== totalBytes) {
+        await FileSystem.deleteAsync(targetPath, { idempotent: true }).catch(() => undefined);
+        return false;
+      }
+
+      return true;
     } catch {
       await FileSystem.deleteAsync(targetPath, { idempotent: true }).catch(() => undefined);
       return false;

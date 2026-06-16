@@ -1,51 +1,35 @@
-import * as Crypto from 'expo-crypto';
+import { File } from 'expo-file-system';
 import * as FileSystem from 'expo-file-system/legacy';
+import { Sha1Hasher } from './sha1-hasher';
 
-function base64ToUint8Array(base64: string): Uint8Array {
-  if (typeof atob === 'function') {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-
-    for (let index = 0; index < binary.length; index += 1) {
-      bytes[index] = binary.charCodeAt(index);
-    }
-
-    return bytes;
-  }
-
-  return Uint8Array.from(Buffer.from(base64, 'base64'));
-}
-
-function digestToBase64(digest: ArrayBuffer): string {
-  const bytes = new Uint8Array(digest);
-  let binary = '';
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-
-  if (typeof btoa === 'function') {
-    return btoa(binary);
-  }
-
-  return Buffer.from(bytes).toString('base64');
-}
+const CHUNK_SIZE_BYTES = 1024 * 1024;
 
 export async function computeFileSha1Base64(filePath: string): Promise<string | null> {
   try {
-    const base64 = await FileSystem.readAsStringAsync(filePath, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    const bytes = base64ToUint8Array(base64);
-    const digest = await Crypto.digest(
-      Crypto.CryptoDigestAlgorithm.SHA1,
-      bytes.buffer.slice(
-        bytes.byteOffset,
-        bytes.byteOffset + bytes.byteLength,
-      ) as ArrayBuffer,
-    );
+    const file = new File(filePath);
 
-    return digestToBase64(digest);
+    if (!file.exists) {
+      return null;
+    }
+
+    const handle = file.open();
+    const hasher = new Sha1Hasher();
+
+    try {
+      while (true) {
+        const chunk = handle.readBytes(CHUNK_SIZE_BYTES);
+
+        if (chunk.length === 0) {
+          break;
+        }
+
+        hasher.update(chunk);
+      }
+    } finally {
+      handle.close();
+    }
+
+    return hasher.digestBase64();
   } catch {
     return null;
   }

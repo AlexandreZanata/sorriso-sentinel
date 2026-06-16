@@ -13,7 +13,7 @@ import { useMapViewportBounds } from '../hooks/use-map-viewport-bounds';
 export function MapScreen() {
   const { t } = useTranslation();
   const { bounds, onBoundsChange } = useMapViewportBounds();
-  const { occurrences, isLoading, error } = useMapOccurrences(bounds);
+  const { occurrences, isInitialLoading, error } = useMapOccurrences(bounds);
   const regionDownload = useMapRegionDownload();
   const pins = occurrences.map((occurrence) => ({
     id: occurrence.id,
@@ -33,7 +33,7 @@ export function MapScreen() {
         progress={regionDownload.progress}
         isInstalled={regionDownload.isInstalled}
       />
-      {isLoading ? (
+      {isInitialLoading ? (
         <View style={styles.loadingOverlay}>
           <Spinner />
         </View>

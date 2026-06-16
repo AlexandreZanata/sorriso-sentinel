@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getDefaultCityId } from '../../../api/config';
 import { useSession } from '../../../session/session-context';
 import type { MapViewportBounds } from '@sorriso-sentinel/mwm-engine';
@@ -10,20 +10,24 @@ import {
 export function useMapOccurrences(bounds: MapViewportBounds) {
   const { sessionToken } = useSession();
   const [occurrences, setOccurrences] = useState<OccurrenceMapItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedOnce = useRef(false);
 
   useEffect(() => {
     if (!sessionToken) {
       setOccurrences([]);
-      setIsLoading(false);
+      setIsInitialLoading(false);
       return;
     }
 
     let active = true;
 
     async function load() {
-      setIsLoading(true);
+      if (!hasLoadedOnce.current) {
+        setIsInitialLoading(true);
+      }
+
       setError(null);
 
       try {
@@ -35,6 +39,7 @@ export function useMapOccurrences(bounds: MapViewportBounds) {
 
         if (active) {
           setOccurrences(data);
+          hasLoadedOnce.current = true;
         }
       } catch {
         if (active) {
@@ -42,7 +47,7 @@ export function useMapOccurrences(bounds: MapViewportBounds) {
         }
       } finally {
         if (active) {
-          setIsLoading(false);
+          setIsInitialLoading(false);
         }
       }
     }
@@ -62,7 +67,7 @@ export function useMapOccurrences(bounds: MapViewportBounds) {
 
   return {
     occurrences,
-    isLoading,
+    isInitialLoading,
     error,
   };
 }
