@@ -31,9 +31,9 @@ apps/mobile/src/
 ## Commands
 
 ```bash
-npm run dev        # expo start
-npm run test       # vitest (i18n, api, bootstrap errors)
-npm run typecheck
+pnpm run dev        # expo start
+pnpm run test       # vitest (i18n, api, bootstrap errors)
+pnpm run typecheck
 ```
 
 ## Environment

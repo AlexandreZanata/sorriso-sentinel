@@ -44,7 +44,7 @@ apps/mobile/
 Run locally:
 
 ```bash
-cd apps/mobile && npm run dev
+cd apps/mobile && pnpm run dev
 ```
 
 ## Related docs

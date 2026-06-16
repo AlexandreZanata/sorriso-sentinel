@@ -16,7 +16,7 @@
     "@react-navigation/bottom-tabs": "^7.18.2",
     "@react-navigation/native": "^7.3.3",
     "@react-navigation/native-stack": "^7.17.5",
-    "@sorriso-sentinel/shared": "*",
+    "@sorriso-sentinel/shared": "workspace:*",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^14.0.0",
     "expo": "~54.0.35",
