@@ -6,8 +6,18 @@
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "scheme": "sorriso-sentinel",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "android": {
+      "usesCleartextTraffic": true
+    },
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-localization",
+      "expo-secure-store"
+    ]
   }
 }

@@ -11,7 +11,9 @@
   "pnpm": {
     "overrides": {
       "react": "19.2.7",
-      "react-dom": "19.2.7"
+      "react-dom": "19.2.7",
+      "@sorriso-sentinel/mobile>react": "19.1.0",
+      "@sorriso-sentinel/mobile>react-test-renderer": "19.1.0"
     },
     "onlyBuiltDependencies": [
       "sharp"
