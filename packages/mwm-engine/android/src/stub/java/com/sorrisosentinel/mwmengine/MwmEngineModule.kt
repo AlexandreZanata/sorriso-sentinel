@@ -3,6 +3,7 @@ package com.sorrisosentinel.mwmengine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
+/** Stub engine when CoMaps SDK is not linked. Downloads run in TypeScript. */
 class MwmEngineModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("MwmEngineModule")
@@ -11,6 +12,10 @@ class MwmEngineModule : Module() {
       Prop("pins") { view: MwmMapView, pins: List<Map<String, Any?>>? ->
         view.setPins(pins.orEmpty())
       }
+    }
+
+    Function("isNativeMapAvailable") {
+      false
     }
 
     AsyncFunction("initializeEngine") { _: Map<String, Any?> ->
@@ -32,6 +37,10 @@ class MwmEngineModule : Module() {
         "totalBytes" to 0,
         "status" to "queued",
       )
+    }
+
+    AsyncFunction("reloadInstalledMaps") {
+      true
     }
   }
 }

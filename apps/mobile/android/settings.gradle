@@ -37,3 +37,19 @@ expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
+
+def comapsRoot = System.getenv('COMAPS_ROOT') ?: '/data/dev/projects/webstorm/comaps'
+def comapsSdkEnabled = providers.gradleProperty('comapsSdkEnabled').orElse('false').get().toBoolean()
+
+if (comapsSdkEnabled) {
+  dependencyResolutionManagement {
+    versionCatalogs {
+      create('libs') {
+        from(files("${comapsRoot}/android/gradle/libs.versions.toml"))
+      }
+    }
+  }
+
+  include ':organicmaps-sdk'
+  project(':organicmaps-sdk').projectDir = new File("${comapsRoot}/android/sdk")
+}

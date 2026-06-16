@@ -9,50 +9,69 @@ Canonical reference: `/data/dev/projects/webstorm/comaps/`
 | `METASERVER_URL`, `MAP_SERIES`, CDN failover | `packages/mwm-engine/src/downloader/` |
 | `countries.txt` catalog + SHA-1 verify | `MapRegionDownloader` |
 | `{documents}/{dataVersion}/{Region}.mwm` | ADR-0005 storage layout |
-| Occurrence pins (app-specific) | API + `MapWebView` markers |
+| Occurrence pins (app-specific) | API + map markers |
+| Place page on POI tap | Native bridge + `MwmPlacePageSheet` (when SDK linked) |
 
-## What requires native CoMaps (not WebView)
+## Native vs interim stack
 
-| Feature | CoMaps component | Status |
-|---------|------------------|--------|
-| Vector map render | `drape_frontend` | Not integrated |
-| POIs at zoom levels | `ScaleIndex` + `RuleDrawer` | Not integrated |
-| Tap → place page | `place_page::Info` → `MapObject` | Types + UI shell only |
-| Offline search | `search::Engine` + `sdx` index | Not integrated |
-| Routing | `RoutingController` | Not integrated |
-| Categories | `categories.txt` | Not integrated |
+| Mode | Map render | POI tap | Download |
+|------|------------|---------|----------|
+| `comapsSdkEnabled=false` (default) | MapLibre WebView + OSM tiles | Not available | TypeScript CDN pipeline |
+| `comapsSdkEnabled=true` | CoMaps `MapView` (drape_frontend) | `place_page::Info` → RN sheet | CoMaps `MapManager` + shared `.mwm` path |
 
-**MapLibre + OSM tiles cannot read `.mwm` files.** Until Phase 2 (see ADR-0005), the map shows online OSM tiles while `.mwm` downloads for future native render.
+**MapLibre cannot read `.mwm` files.** Enable the native SDK for the same vector map, POIs, and place pages as the CoMaps app.
 
 ## Build CoMaps Android SDK (one-time)
 
 ```bash
-# From CoMaps repo
-cd /data/dev/projects/webstorm/comaps/android
-./gradlew :sdk:assembleRelease
+# 1. Clone and init submodules
+git clone https://github.com/comapsapp/comaps.git /data/dev/projects/webstorm/comaps
+cd /data/dev/projects/webstorm/comaps
+git submodule update --init --recursive
 
-# Output AAR (path may vary by version):
-# android/sdk/build/outputs/aar/sdk-release.aar
+# 2. Build SDK (from Sorriso repo)
+COMAPS_ROOT=/data/dev/projects/webstorm/comaps ./scripts/build-comaps-android-sdk.sh
 ```
 
-## Link into Sorriso (Phase 2)
+## Enable native map in the mobile app
 
-1. Copy or composite-build `comaps/android/sdk` as a dependency of `packages/mwm-engine/android`.
-2. Initialize in `MainApplication`:
-   - `OrganicMaps.init()` (mirror `MwmApplication.java`)
-3. Replace `MwmMapView.kt` stub with `app.organicmaps.sdk.MapView`.
-4. Register `.mwm` from `{documents}/{dataVersion}/` via native `Storage`.
-5. Forward `Framework.nativePlacePageActivationListener` to Expo `onPlacePageActivated` event.
+1. Build CoMaps SDK (see above).
+2. Set `comapsSdkEnabled=true` in `apps/mobile/android/gradle.properties`.
+3. Ensure NDK **28.2.13676358** is installed (`sdkmanager "ndk;28.2.13676358"`).
+4. Do **not** set `ndk.dir` in `local.properties` (causes CXX1104 vs RN modules).
+5. Rebuild:
 
-## Run the app (current interim stack)
+```bash
+cd apps/mobile/android
+./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Note:** CoMaps `assembleRelease` fails with `ld.gold` on NDK r28; use `assembleDebug` for the SDK (see `scripts/build-comaps-android-sdk.sh`).
+
+## Run with local API
 
 ```bash
 make docker-up
 docker compose -f docker/docker-compose.api.yml up
 
-cd apps/mobile/android
-EXPO_PUBLIC_API_URL=http://<LAN_IP>:3010 ./gradlew assembleRelease
-adb install -r app/build/outputs/apk/release/app-release.apk
+# Physical device — use your machine LAN IP
+EXPO_PUBLIC_API_URL=http://<LAN_IP>:3010 pnpm --filter @sorriso-sentinel/mobile run android
+
+# USB debugging
+adb reverse tcp:3010 tcp:3010
+```
+
+The app loads `SessionGate` → `MainTabs` → `MapScreen` directly (no splash mock). API binds `HOST=0.0.0.0` on port `3010`.
+
+## Architecture
+
+```
+Tap on POI (native)
+  → Framework::BuildPlacePageInfo
+  → PlacePageActivationListener (Kotlin)
+  → Expo event onPlacePageActivated
+  → MwmPlacePageSheet (React Native)
 ```
 
 ## Related

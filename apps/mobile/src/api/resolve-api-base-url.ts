@@ -8,7 +8,7 @@ let cachedBaseUrl: string | null = null;
 export function getApiUrlCandidates(): string[] {
   const configured = process.env.EXPO_PUBLIC_API_URL?.trim() || DEFAULT_API_URL;
 
-  return [...new Set([configured, USB_REVERSE_API_URL, EMULATOR_API_URL])];
+  return [...new Set([USB_REVERSE_API_URL, configured, EMULATOR_API_URL])];
 }
 
 export function getCachedApiBaseUrl(): string | null {

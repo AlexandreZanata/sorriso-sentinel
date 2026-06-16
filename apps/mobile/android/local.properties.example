@@ -2,5 +2,5 @@
 ##   pnpm run android:configure
 ##
 ## Use the SDK root that contains platform-tools/ and ndk/.
+## Do not set ndk.dir here — it forces one NDK for all modules and breaks CoMaps (28.2) vs RN (27.1).
 sdk.dir=/data/dev/android/sdk/Sdk
-ndk.dir=/data/dev/android/sdk/Sdk/ndk/27.1.12297006

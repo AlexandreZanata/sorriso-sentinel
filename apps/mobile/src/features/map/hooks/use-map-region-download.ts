@@ -31,6 +31,7 @@ export function useMapRegionDownload() {
 
     if (ok && next.status === 'finished') {
       setIsInstalled(true);
+      await MwmEngineModule.reloadInstalledMaps();
     }
 
     return ok;

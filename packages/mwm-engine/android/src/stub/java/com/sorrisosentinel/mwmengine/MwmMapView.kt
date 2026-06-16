@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 
+/** Placeholder map surface when CoMaps SDK is not linked (`comapsSdkEnabled=false`). */
 class MwmMapView(context: Context) : View(context) {
   init {
     setBackgroundColor(Color.parseColor("#DDEBFF"))

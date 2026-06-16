@@ -6,7 +6,9 @@ import { ScreenShell } from '../../../ui/templates/screen-shell';
 import { Text } from '../../../ui/atoms/text';
 import { MapViewport } from '../../../ui/organisms/map-viewport';
 import { MapOfflineDownloadBanner } from '../components/map-offline-download-banner';
+import { MwmPlacePageSheet } from '../components/mwm-place-page-sheet';
 import { useMapOccurrences } from '../hooks/use-map-occurrences';
+import { useMapPlacePage } from '../hooks/use-map-place-page';
 import { useMapRegionDownload } from '../hooks/use-map-region-download';
 import { colors } from '../../../ui/theme/colors';
 import { spacing } from '../../../ui/theme/spacing';
@@ -15,6 +17,7 @@ export function MapScreen() {
   const { t } = useTranslation();
   const { occurrences, error, retry } = useMapOccurrences();
   const regionDownload = useMapRegionDownload();
+  const { placePage, dismissPlacePage } = useMapPlacePage();
   const pins = useMemo(
     () =>
       occurrences.map((occurrence) => ({
@@ -37,6 +40,9 @@ export function MapScreen() {
         progress={regionDownload.progress}
         isInstalled={regionDownload.isInstalled}
       />
+      {placePage ? (
+        <MwmPlacePageSheet place={placePage} onDismiss={dismissPlacePage} />
+      ) : null}
       {error ? (
         <Pressable style={styles.errorBanner} onPress={retry}>
           <Text variant="caption" color="danger">

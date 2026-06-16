@@ -6,14 +6,27 @@ plugins {
 group = 'com.sorrisosentinel.mwmengine'
 version = '0.1.0'
 
+def comapsSdkEnabled = providers.gradleProperty('comapsSdkEnabled').orElse('false').get().toBoolean()
+
 android {
   namespace "com.sorrisosentinel.mwmengine"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
   }
+
+  sourceSets {
+    if (comapsSdkEnabled) {
+      main.java.srcDirs += 'src/comaps/java'
+    } else {
+      main.java.srcDirs += 'src/stub/java'
+    }
+  }
 }
 
 dependencies {
-  // No explicit dependency on expo-modules-core; provided by Expo autolinking.
+  if (comapsSdkEnabled) {
+    implementation project(':organicmaps-sdk')
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
+  }
 }

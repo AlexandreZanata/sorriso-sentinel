@@ -16,6 +16,7 @@ export const I18N_KEYS = {
   map: {
     placeholder: 'map.placeholder',
     loadError: 'map.loadError',
+    retryLoad: 'map.retryLoad',
     download: {
       preparing: 'map.download.preparing',
       title: 'map.download.title',
@@ -30,6 +31,10 @@ export const I18N_KEYS = {
       retry: 'map.download.retry',
       failed: 'map.download.failed',
       background: 'map.download.background',
+      backgroundFailed: 'map.download.backgroundFailed',
+    },
+    placePage: {
+      close: 'map.placePage.close',
     },
   },
   occurrence: {

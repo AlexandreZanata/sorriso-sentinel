@@ -339,46 +339,63 @@ export class MapRegionDownloader {
       : this.options.dataVersion;
   }
 
+  private getMapsBaseDirectory(): string {
+    if (!this.options) {
+      return '';
+    }
+
+    if (this.options.writablePath.startsWith('/')) {
+      return this.options.writablePath.endsWith('/')
+        ? this.options.writablePath
+        : `${this.options.writablePath}/`;
+    }
+
+    return FileSystem.documentDirectory ?? '';
+  }
+
   private getStorageDirectory(): string | null {
-    if (!this.options || !FileSystem.documentDirectory) {
+    const baseDirectory = this.getMapsBaseDirectory();
+
+    if (!baseDirectory) {
       return null;
     }
 
-    return buildCoMapsRegionDirectory(
-      FileSystem.documentDirectory,
-      this.getDataVersion(),
-    );
+    return buildCoMapsRegionDirectory(baseDirectory, this.getDataVersion());
   }
 
   private getRegionFilePath(regionId: string): string | null {
-    if (!this.options || !FileSystem.documentDirectory) {
+    const baseDirectory = this.getMapsBaseDirectory();
+
+    if (!baseDirectory) {
       return null;
     }
 
     return buildCoMapsRegionFilePath(
-      FileSystem.documentDirectory,
+      baseDirectory,
       this.getDataVersion(),
       regionId,
     );
   }
 
   private getStorageRoots(): Array<{ path: string; dataVersion: number }> {
-    if (!this.options || !FileSystem.documentDirectory) {
+    if (!this.options) {
       return [];
     }
 
     const dataVersion = this.getDataVersion();
-    const documentDirectory = FileSystem.documentDirectory;
-    const roots: Array<{ path: string; dataVersion: number }> = [
-      {
-        path: buildCoMapsRegionDirectory(documentDirectory, dataVersion),
-        dataVersion,
-      },
-    ];
+    const baseDirectory = this.getMapsBaseDirectory();
+    const roots: Array<{ path: string; dataVersion: number }> = [];
 
-    if (this.options.writablePath) {
+    if (baseDirectory) {
       roots.push({
-        path: `${documentDirectory}${this.options.writablePath}/`,
+        path: buildCoMapsRegionDirectory(baseDirectory, dataVersion),
+        dataVersion,
+      });
+    }
+
+    if (FileSystem.documentDirectory && this.options.writablePath && !this.options.writablePath.startsWith('/')) {
+      roots.push({
+        path: `${FileSystem.documentDirectory}${this.options.writablePath}/`,
         dataVersion,
       });
     }
