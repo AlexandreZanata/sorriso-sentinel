@@ -56,7 +56,7 @@ Sorriso Sentinel production runs as containerized services with pinned images, h
 - [x] Health endpoints verified: `/health`, `/ready`, `/live`
 - [x] Structured logging and correlation IDs active
 - [x] Rollback procedure documented and tested (see below)
-- [x] Security headers and CORS allowlist verified (`npm run docker:prod-validate`)
+- [x] Security headers and CORS allowlist verified (`pnpm run docker:prod-validate`)
 - [x] RLS tested with `sentinel_app` in staging/prod validate script
 - [x] RPO/RTO documented — [disaster-recovery.md](disaster-recovery.md)
 
@@ -119,7 +119,7 @@ docker compose \
 Validate locally before deploy:
 
 ```bash
-npm run docker:prod-validate
+pnpm run docker:prod-validate
 ```
 
 ## API container
@@ -151,7 +151,7 @@ docker build -f docker/Dockerfile.api -t sorriso-sentinel/api:0.1.0 .
 - Connection pooling via PgBouncer (recommended at scale)
 - SSL enabled in prod overlay (`ssl=on`)
 
-Staging RLS verification: `npm run docker:prod-validate` (or `packages/database` integration tests with `DATABASE_URL`).
+Staging RLS verification: `pnpm run docker:prod-validate` (or `packages/database` integration tests with `DATABASE_URL`).
 
 ## Observability
 
@@ -177,10 +177,10 @@ See [disaster-recovery.md](disaster-recovery.md) for RPO/RTO and restore testing
 
 ## Security scan on release
 
-CI job `security-scan` runs `npm audit --omit=dev --audit-level=high` on every PR and before GitHub Release creation (tag push).
+CI job `security-scan` runs `pnpm audit --prod --audit-level=high` on every PR and before GitHub Release creation (tag push).
 
 ```bash
-npm run validate:security
+pnpm run validate:security
 ```
 
 ## Related docs

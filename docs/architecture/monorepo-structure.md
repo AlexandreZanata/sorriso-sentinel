@@ -21,7 +21,7 @@ sorriso-sentinel/
 ├── docker/                  # Dockerfiles and compose
 ├── turbo.json
 ├── package.json
-└── pnpm-workspace.yaml      # or npm workspaces
+└── pnpm-workspace.yaml      # pnpm workspaces
 ```
 
 ## API internal structure (Vertical Slice)

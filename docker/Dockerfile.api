@@ -1,20 +1,29 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20.19.4-alpine AS build
+# Prune monorepo to API dependency graph only — smaller context and faster installs.
+FROM node:20.19.4-alpine AS pruner
 WORKDIR /app
-RUN apk add --no-cache libc6-compat vips
-COPY package.json package-lock.json turbo.json tsconfig.base.json ./
-COPY apps/api ./apps/api
-COPY packages/domain ./packages/domain
-COPY packages/geo ./packages/geo
-COPY packages/shared ./packages/shared
-COPY packages/database ./packages/database
-RUN npm ci \
-  && npm run build -w @sorriso-sentinel/geo \
-  && npm run build -w @sorriso-sentinel/domain \
-  && npm run build -w @sorriso-sentinel/shared \
-  && npm run build -w @sorriso-sentinel/database \
-  && npm run build -w @sorriso-sentinel/api
+RUN corepack enable && corepack prepare pnpm@10.14.0 --activate
+COPY . .
+RUN pnpm dlx turbo@2.5.4 prune @sorriso-sentinel/api --docker
+
+FROM node:20.19.4-alpine AS deps
+WORKDIR /app
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@10.14.0 --activate \
+  && apk add --no-cache libc6-compat vips
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+  pnpm install --frozen-lockfile
+
+FROM deps AS build
+COPY --from=pruner /app/out/full/ .
+COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+  pnpm install --frozen-lockfile \
+  && pnpm run build --filter=@sorriso-sentinel/api...
 
 FROM node:20.19.4-alpine AS runner
 WORKDIR /app
@@ -23,13 +32,13 @@ RUN addgroup -g 1001 -S sentinel \
   && adduser -S sentinel -u 1001 -G sentinel \
   && apk add --no-cache wget vips
 USER sentinel
-COPY --from=build --chown=sentinel:sentinel /app/apps/api/dist ./dist
+# Keep monorepo layout so pnpm workspace symlinks in apps/api/node_modules resolve.
 COPY --from=build --chown=sentinel:sentinel /app/node_modules ./node_modules
-COPY --from=build --chown=sentinel:sentinel /app/packages/domain ./packages/domain
-COPY --from=build --chown=sentinel:sentinel /app/packages/geo ./packages/geo
-COPY --from=build --chown=sentinel:sentinel /app/packages/shared ./packages/shared
-COPY --from=build --chown=sentinel:sentinel /app/packages/database ./packages/database
-COPY --from=build --chown=sentinel:sentinel /app/apps/api/package.json ./package.json
+COPY --from=build --chown=sentinel:sentinel /app/packages ./packages
+COPY --from=build --chown=sentinel:sentinel /app/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=sentinel:sentinel /app/apps/api/package.json ./apps/api/package.json
+COPY --from=build --chown=sentinel:sentinel /app/apps/api/node_modules ./apps/api/node_modules
+WORKDIR /app/apps/api
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/health || exit 1

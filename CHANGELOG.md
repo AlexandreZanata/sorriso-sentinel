@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate monorepo to **pnpm** (lockfile, CI, Docker, Makefile, Husky); Docker API builds use `turbo prune` + BuildKit pnpm store cache and skip rebuild when `sorriso-sentinel/api:local` exists
+
 ### Added
 
 - Mobile app foundation: i18n (en, pt-BR), theme tokens, atoms, navigation, session bootstrap

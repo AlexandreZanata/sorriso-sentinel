@@ -1,0 +1,37 @@
+# Git and IDE
+.git
+.github
+.cursor
+.idea
+.vscode
+
+# Dependencies and build outputs (reinstalled in image)
+node_modules
+**/node_modules
+.turbo
+**/.turbo
+**/dist
+**/.next
+coverage
+
+# Apps not required for API Docker image (turbo prune still benefits from smaller context)
+apps/mobile
+apps/web
+apps/worker
+
+# Local TLS keys (not needed for API image build)
+docker/postgres/ssl/*.key
+
+# Docs and local env
+docs
+*.md
+!package.json
+.env
+.env.*
+
+# Tests and misc
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+terminals
+agent-transcripts

@@ -33,7 +33,7 @@ Operational targets and procedures for Sorriso Sentinel production. Adjust RPO/R
 4. **Object storage** — verify media bucket integrity; re-sync from replica if needed.
 5. **Redeploy** — `docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d --wait` with pinned `VERSION`.
 6. **Verify** — `/health`, `/ready`, smoke test create/read occurrence, admin audit route 403 for non-admin.
-7. **RLS** — run `npm run docker:prod-validate` or staging equivalent to confirm `sentinel_app` RLS.
+7. **RLS** — run `pnpm run docker:prod-validate` or staging equivalent to confirm `sentinel_app` RLS.
 
 ## Rollback (application)
 

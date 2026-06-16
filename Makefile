@@ -13,31 +13,31 @@ help:
 	@echo "  make docker-up   Start Postgres, Redis, MinIO"
 
 setup:
-	npm run setup
+	pnpm run setup
 
 check:
-	npm run check
+	pnpm run check
 
 validate:
-	npm run validate
+	pnpm run validate
 
 lint:
-	npm run lint
+	pnpm run lint
 
 test:
-	npm run test
+	pnpm run test
 
 build:
-	npm run build
+	pnpm run build
 
 dev:
-	npm run dev
+	pnpm run dev
 
 docker-up:
-	npm run docker:up
+	pnpm run docker:up
 
 docker-validate:
-	npm run docker:validate
+	pnpm run docker:validate
 
 docker-down:
-	npm run docker:down
+	pnpm run docker:down

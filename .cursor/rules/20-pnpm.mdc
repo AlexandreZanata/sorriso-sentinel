@@ -1,0 +1,46 @@
+---
+description: Package manager — pnpm only for installs, scripts, CI, and Docker
+alwaysApply: true
+---
+
+# Package manager — pnpm
+
+**pnpm** is the only package manager for this monorepo. Do not use `npm install`, `npm ci`, or `yarn`.
+
+## Required
+
+| Context | Command |
+|---------|---------|
+| Install deps | `pnpm install` |
+| CI install | `pnpm install --frozen-lockfile` |
+| Run script | `pnpm run <script>` or `pnpm <script>` |
+| Workspace package | `pnpm --filter @sorriso-sentinel/api run dev` |
+| Docker API build | `pnpm install` / `pnpm run build` inside Dockerfile (via Corepack) |
+
+## Lockfile
+
+- **`pnpm-lock.yaml`** is committed — never commit `package-lock.json`
+- After dependency changes: `pnpm install` and commit `pnpm-lock.yaml`
+
+## Corepack
+
+```bash
+sudo corepack enable   # once per machine (needs write access to Node install dir)
+corepack prepare pnpm@10.14.0 --activate
+```
+
+Without sudo: `npx pnpm@10.14.0 <command>` or `corepack prepare` after enable by an admin.
+
+Root `package.json` `packageManager` field pins the version.
+
+## Agent behavior
+
+- Replace `npm run` with `pnpm run` in scripts, docs, and CI when editing
+- Docker images use `turbo prune` + pnpm store BuildKit cache — do not revert to `npm ci` in Dockerfiles
+- Husky hooks use `pnpm run validate`
+
+## Related
+
+- `pnpm-workspace.yaml` — workspace packages
+- `.npmrc` — `node-linker=hoisted` for Expo / NestJS compatibility
+- `docs/contributing/development-setup.md`

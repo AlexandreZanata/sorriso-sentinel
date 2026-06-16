@@ -8,7 +8,7 @@ This guide sets up a local environment that mirrors CI and enforces project stan
 |------|---------|---------|
 | [Git](https://git-scm.com/) | 2.x+ | Version control |
 | [Node.js](https://nodejs.org/) | 20+ (see `.nvmrc`) | Dev tooling, lint, hooks |
-| [npm](https://www.npmjs.com/) | 10+ | Package manager |
+| [pnpm](https://pnpm.io/) | 10.14+ (see `packageManager`) | Package manager |
 | [Make](https://www.gnu.org/software/make/) | optional | Shortcut commands |
 
 Optional:
@@ -27,7 +27,7 @@ nvm use
 
 # Install deps, git hooks, and run validation
 make setup
-# or: npm run setup
+# or: pnpm run setup
 ```
 
 This will:
@@ -77,22 +77,22 @@ git push -u origin feat/my-feature
 | `make docker-up` | Start Postgres, Redis, MinIO |
 | `make docker-validate` | Full Docker health check (required before PR) |
 | `make fix` | Auto-fix markdown lint issues |
-| `npm run check` | Same as `make check` |
-| `npm run validate` | Same as `make validate` |
+| `pnpm run check` | Same as `make check` |
+| `pnpm run validate` | Same as `make validate` |
 
 ### Monorepo workspaces
 
 | Workspace | Command | Port |
 |-----------|---------|------|
-| API (NestJS) | `npm run dev -w @sorriso-sentinel/api` | 3000 |
-| Web (Next.js) | `npm run dev -w @sorriso-sentinel/web` | 3001 |
-| Worker | `npm run dev -w @sorriso-sentinel/worker` | — |
-| Mobile (Expo) | `npm run dev -w @sorriso-sentinel/mobile` | — |
+| API (NestJS) | `pnpm --filter @sorriso-sentinel/api run dev` | 3000 |
+| Web (Next.js) | `pnpm --filter @sorriso-sentinel/web run dev` | 3001 |
+| Worker | `pnpm --filter @sorriso-sentinel/worker run dev` | — |
+| Mobile (Expo) | `pnpm --filter @sorriso-sentinel/mobile run dev` | — |
 
 Production Next.js build (when React workspace isolation is resolved):
 
 ```bash
-npm run build:next -w @sorriso-sentinel/web
+pnpm --filter @sorriso-sentinel/web run build:next
 ```
 
 ## Git hooks (automatic)
@@ -101,7 +101,7 @@ Husky runs these hooks on every commit:
 
 | Hook | What it does |
 |------|--------------|
-| **pre-commit** | Blocks commits on `main`; runs `npm run validate` |
+| **pre-commit** | Blocks commits on `main`; runs `pnpm run validate` |
 | **commit-msg** | Enforces [Conventional Commits](commits.md) via commitlint |
 
 To bypass hooks in an emergency (discouraged): `git commit --no-verify` — only when explicitly needed.
@@ -120,7 +120,7 @@ Shared settings in [`.vscode/settings.json`](../../.vscode/settings.json):
 
 ## CI parity
 
-Local `npm run validate` runs the same checks as [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+Local `pnpm run validate` runs the same checks as [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
 1. Required open source files exist
 2. `VERSION` is valid SemVer
@@ -148,14 +148,29 @@ feat(scope): short description in english
 
 See [commits.md](commits.md).
 
-### `npm ci` fails
+### `pnpm install` fails
 
 Ensure Node 20+ (`node -v`) and run `nvm use` if applicable.
+
+Enable pnpm via Corepack (requires write access to Node's install directory):
+
+```bash
+sudo corepack enable
+corepack prepare pnpm@10.14.0 --activate
+```
+
+Without `sudo`, use the pinned version directly:
+
+```bash
+npx pnpm@10.14.0 install
+```
+
+After Corepack is enabled once on the machine, `pnpm install` works from the repo root (`packageManager` field pins the version).
 
 ### Hooks not running
 
 ```bash
-npm run prepare
+pnpm run prepare
 chmod +x scripts/*.sh .husky/*
 ```
 

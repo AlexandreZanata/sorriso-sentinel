@@ -13,7 +13,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@sorriso-sentinel/domain": "*",
+    "@sorriso-sentinel/domain": "workspace:*",
     "bullmq": "^5.53.0",
     "ioredis": "^5.6.1"
   },

@@ -10,7 +10,8 @@ Full guide: `docs/contributing/development-setup.md`
 ## Setup
 
 ```bash
-nvm use && make setup
+nvm use && corepack enable
+make setup
 cp .env.example .env
 ```
 
@@ -24,7 +25,7 @@ make check   # branch guard + CI parity validation
 
 1. Never commit on `main` — use topic branch (`feat/`, `fix/`, etc.)
 2. Husky enforces pre-commit validation and Conventional Commits
-3. Local `npm run validate` mirrors CI
+3. Local `pnpm run validate` mirrors CI
 
 ## Commands
 

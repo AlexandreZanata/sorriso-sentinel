@@ -20,7 +20,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@sorriso-sentinel/geo": "*"
+    "@sorriso-sentinel/geo": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
