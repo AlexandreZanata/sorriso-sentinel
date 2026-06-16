@@ -6,6 +6,10 @@ export interface CorsConfigOptions {
 const DEFAULT_DEV_ORIGINS = [
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+  'http://localhost:8082',
+  'http://127.0.0.1:8082',
 ] as const;
 
 function isProduction(nodeEnv: string | undefined): boolean {
@@ -43,7 +47,13 @@ export function enableApplicationCors(
   app.enableCors({
     origin: parseCorsOrigins(options),
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Request-Id',
+      'x-city-id',
+      'x-correlation-id',
+    ],
     credentials: true,
     maxAge: 3600,
   });

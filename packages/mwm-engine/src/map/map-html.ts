@@ -1,4 +1,4 @@
-import { DEFAULT_MAP_CENTER } from '../downloader/constants';
+import { MAP_CONFIG } from './map-config';
 
 export interface MapHtmlPin {
   id: string;
@@ -9,7 +9,8 @@ export interface MapHtmlPin {
 }
 
 export function buildMapHtml(
-  center = DEFAULT_MAP_CENTER,
+  center = MAP_CONFIG.center,
+  zoom = MAP_CONFIG.initialZoom,
 ): string {
   return `<!DOCTYPE html>
 <html>
@@ -54,7 +55,9 @@ export function buildMapHtml(
           layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
         },
         center: [${center.longitude}, ${center.latitude}],
-        zoom: 13,
+        zoom: ${zoom},
+        minZoom: ${MAP_CONFIG.minZoom},
+        maxZoom: ${MAP_CONFIG.maxZoom},
         attributionControl: true,
       });
 
@@ -67,6 +70,21 @@ export function buildMapHtml(
           marker.remove();
         }
         markers = [];
+      }
+
+      function postBounds() {
+        const bounds = map.getBounds();
+        const payload = JSON.stringify({
+          type: 'bounds',
+          minLatitude: bounds.getSouth(),
+          maxLatitude: bounds.getNorth(),
+          minLongitude: bounds.getWest(),
+          maxLongitude: bounds.getEast(),
+        });
+
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(payload);
+        }
       }
 
       window.updatePins = function updatePins(pins) {
@@ -82,13 +100,15 @@ export function buildMapHtml(
         }
       };
 
-      window.setMapCenter = function setMapCenter(latitude, longitude, zoom) {
+      window.setMapCenter = function setMapCenter(latitude, longitude, zoomLevel) {
         map.jumpTo({
           center: [longitude, latitude],
-          zoom: typeof zoom === 'number' ? zoom : map.getZoom(),
+          zoom: typeof zoomLevel === 'number' ? zoomLevel : map.getZoom(),
         });
       };
 
+      map.on('load', postBounds);
+      map.on('moveend', postBounds);
       window.updatePins([]);
     </script>
   </body>

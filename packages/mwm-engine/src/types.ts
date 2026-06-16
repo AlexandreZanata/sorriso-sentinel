@@ -1,3 +1,9 @@
+export interface MwmRegionCatalogEntry {
+  id: string;
+  sizeBytes: number;
+  sha1Base64: string;
+}
+
 export interface MwmEngineInitOptions {
   writablePath: string;
   cachePath: string;

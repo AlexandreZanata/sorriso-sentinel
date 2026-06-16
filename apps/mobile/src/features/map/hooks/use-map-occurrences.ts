@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react';
 import { getDefaultCityId } from '../../../api/config';
 import { useSession } from '../../../session/session-context';
+import type { MapViewportBounds } from '@sorriso-sentinel/mwm-engine';
 import {
   listMapOccurrences,
   type OccurrenceMapItem,
 } from '../services/list-occurrences.service';
 
-const DEFAULT_BBOX = {
-  minLatitude: -12.58,
-  maxLatitude: -12.51,
-  minLongitude: -55.76,
-  maxLongitude: -55.68,
-};
-
-export function useMapOccurrences() {
+export function useMapOccurrences(bounds: MapViewportBounds) {
   const { sessionToken } = useSession();
   const [occurrences, setOccurrences] = useState<OccurrenceMapItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!sessionToken) {
+      setOccurrences([]);
+      setIsLoading(false);
+      return;
+    }
+
     let active = true;
 
     async function load() {
@@ -28,7 +28,7 @@ export function useMapOccurrences() {
 
       try {
         const data = await listMapOccurrences({
-          ...DEFAULT_BBOX,
+          ...bounds,
           cityId: getDefaultCityId(),
           token: sessionToken,
         });
@@ -52,7 +52,13 @@ export function useMapOccurrences() {
     return () => {
       active = false;
     };
-  }, [sessionToken]);
+  }, [
+    sessionToken,
+    bounds.minLatitude,
+    bounds.maxLatitude,
+    bounds.minLongitude,
+    bounds.maxLongitude,
+  ]);
 
   return {
     occurrences,

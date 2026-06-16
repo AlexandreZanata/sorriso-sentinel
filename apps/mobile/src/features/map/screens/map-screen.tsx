@@ -5,11 +5,16 @@ import { ScreenShell } from '../../../ui/templates/screen-shell';
 import { Text } from '../../../ui/atoms/text';
 import { Spinner } from '../../../ui/atoms/spinner';
 import { MapViewport } from '../../../ui/organisms/map-viewport';
+import { MapOfflineDownloadBanner } from '../components/map-offline-download-banner';
 import { useMapOccurrences } from '../hooks/use-map-occurrences';
+import { useMapRegionDownload } from '../hooks/use-map-region-download';
+import { useMapViewportBounds } from '../hooks/use-map-viewport-bounds';
 
 export function MapScreen() {
   const { t } = useTranslation();
-  const { occurrences, isLoading, error } = useMapOccurrences();
+  const { bounds, onBoundsChange } = useMapViewportBounds();
+  const { occurrences, isLoading, error } = useMapOccurrences(bounds);
+  const regionDownload = useMapRegionDownload();
   const pins = occurrences.map((occurrence) => ({
     id: occurrence.id,
     latitude: occurrence.location.latitude,
@@ -23,7 +28,11 @@ export function MapScreen() {
       header={<Text variant="subtitle">{t(I18N_KEYS.tabs.map)}</Text>}
       contentStyle={styles.content}
     >
-      <MapViewport pins={pins} />
+      <MapViewport pins={pins} onBoundsChange={onBoundsChange} />
+      <MapOfflineDownloadBanner
+        progress={regionDownload.progress}
+        isInstalled={regionDownload.isInstalled}
+      />
       {isLoading ? (
         <View style={styles.loadingOverlay}>
           <Spinner />

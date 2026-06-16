@@ -3,6 +3,8 @@ export const METASERVER_URL = 'https://cdn-us-1.comaps.app';
 export const MAP_SERIES = '2026.04.05';
 /** Current CoMaps data version from `data/countries.txt` (`v` field). */
 export const DEFAULT_DATA_VERSION = 260603;
+/** Sent to metaserver as `X-OM-AppVersion` (CoMaps `map_files_downloader.cpp`). */
+export const MWM_ENGINE_APP_VERSION = '0.1.0';
 export const MAPS_BASE_PATH = 'maps';
 export const MWM_FILE_EXTENSION = '.mwm';
 

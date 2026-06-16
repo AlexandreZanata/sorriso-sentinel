@@ -29,6 +29,7 @@ export const I18N_KEYS = {
       downloading: 'map.download.downloading',
       retry: 'map.download.retry',
       failed: 'map.download.failed',
+      background: 'map.download.background',
     },
   },
   occurrence: {

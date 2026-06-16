@@ -1,5 +1,4 @@
 export type RootStackParamList = {
-  Bootstrap: undefined;
   Main: undefined;
 };
 

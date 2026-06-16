@@ -1,11 +1,13 @@
 import type {
   MwmDownloadProgress,
   MwmEngineInitOptions,
+  MwmRegionCatalogEntry,
   MwmRegionDescriptor,
 } from './types';
 import {
   downloadMwmRegion,
   getMwmDownloadProgress,
+  getMwmRegionCatalogEntry,
   initializeMwmEngine,
   listInstalledMwmRegions,
 } from './engine/ts-mwm-engine';
@@ -25,5 +27,9 @@ export const MwmEngineModule = {
 
   async getDownloadProgress(regionId: string): Promise<MwmDownloadProgress> {
     return getMwmDownloadProgress(regionId);
+  },
+
+  async getRegionCatalogEntry(regionId: string): Promise<MwmRegionCatalogEntry | null> {
+    return getMwmRegionCatalogEntry(regionId);
   },
 };

@@ -3,6 +3,7 @@ import type { DownloadProgressData } from 'expo-file-system/legacy';
 import type {
   MwmDownloadProgress,
   MwmEngineInitOptions,
+  MwmRegionCatalogEntry,
   MwmRegionDescriptor,
 } from '../types';
 import {
@@ -13,11 +14,13 @@ import {
   DEFAULT_CDN_SERVERS,
   DEFAULT_DATA_VERSION,
   METASERVER_URL,
+  MWM_ENGINE_APP_VERSION,
   MWM_FILE_EXTENSION,
 } from './constants';
 import { joinUrl } from './join-url';
 import { parseCountriesCatalog } from './parse-countries-catalog';
 import { parseMetaConfig } from './parse-meta-config';
+import { verifyRegionFile } from './verify-region-file';
 
 type ProgressCallback = (data: DownloadProgressData) => void;
 
@@ -131,6 +134,23 @@ export class MapRegionDownloader {
       return false;
     }
 
+    const verified = await verifyRegionFile(
+      targetPath,
+      region.sizeBytes,
+      region.sha1Base64,
+    );
+
+    if (!verified) {
+      await FileSystem.deleteAsync(targetPath, { idempotent: true }).catch(() => undefined);
+      this.setProgress(regionId, {
+        regionId,
+        downloadedBytes: 0,
+        totalBytes: region.sizeBytes,
+        status: 'failed',
+      });
+      return false;
+    }
+
     this.setProgress(regionId, {
       regionId,
       downloadedBytes: region.sizeBytes,
@@ -152,11 +172,28 @@ export class MapRegionDownloader {
     );
   }
 
+  async getRegionCatalogEntry(regionId: string): Promise<MwmRegionCatalogEntry | null> {
+    const region = await this.getCatalogRegion(regionId);
+
+    if (!region) {
+      return null;
+    }
+
+    return {
+      id: region.id,
+      sizeBytes: region.sizeBytes,
+      sha1Base64: region.sha1Base64,
+    };
+  }
+
   private async refreshServers(): Promise<void> {
+    const dataVersion = String(this.getDataVersion());
     const response = await fetch(joinUrl(METASERVER_URL, 'servers'), {
       headers: {
         Accept: 'application/json',
         'Accept-Language': this.options?.locale ?? 'en',
+        'X-OM-DataVersion': dataVersion,
+        'X-OM-AppVersion': MWM_ENGINE_APP_VERSION,
       },
     }).catch(() => null);
 
@@ -268,7 +305,7 @@ export class MapRegionDownloader {
 
       const info = await FileSystem.getInfoAsync(result.uri);
 
-      return info.exists && info.size === totalBytes;
+      return info.exists && typeof info.size === 'number' && info.size === totalBytes;
     } catch {
       await FileSystem.deleteAsync(targetPath, { idempotent: true }).catch(() => undefined);
       return false;

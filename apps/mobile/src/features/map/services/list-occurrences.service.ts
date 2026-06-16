@@ -11,11 +11,11 @@ export interface OccurrenceMapItem {
 }
 
 interface ListOccurrencesResponse {
-  data: Array<{
+  items: Array<{
     id: string;
     category: string;
     status: string;
-    problemLocation: {
+    location?: {
       latitude: number;
       longitude: number;
     };
@@ -54,10 +54,16 @@ export async function listMapOccurrences(input: {
     cityId: input.cityId,
   });
 
-  return response.data.map((item) => ({
-    id: item.id,
-    category: item.category,
-    status: item.status,
-    location: item.problemLocation,
-  }));
+  return response.items
+    .filter(
+      (item): item is ListOccurrencesResponse['items'][number] & {
+        location: { latitude: number; longitude: number };
+      } => Boolean(item.location),
+    )
+    .map((item) => ({
+      id: item.id,
+      category: item.category,
+      status: item.status,
+      location: item.location,
+    }));
 }

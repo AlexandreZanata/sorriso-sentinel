@@ -1,6 +1,7 @@
 import type {
   MwmDownloadProgress,
   MwmEngineInitOptions,
+  MwmRegionCatalogEntry,
   MwmRegionDescriptor,
 } from '../types';
 import { MapRegionDownloader } from '../downloader/map-region-downloader';
@@ -23,4 +24,10 @@ export async function downloadMwmRegion(regionId: string): Promise<boolean> {
 
 export function getMwmDownloadProgress(regionId: string): MwmDownloadProgress {
   return downloader.getDownloadProgress(regionId);
+}
+
+export async function getMwmRegionCatalogEntry(
+  regionId: string,
+): Promise<MwmRegionCatalogEntry | null> {
+  return downloader.getRegionCatalogEntry(regionId);
 }
