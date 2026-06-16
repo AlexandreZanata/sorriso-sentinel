@@ -68,7 +68,24 @@ Copy root `.env.example` — mobile uses:
 - `EXPO_PUBLIC_API_URL` (default `http://127.0.0.1:3010`)
 - `EXPO_PUBLIC_DEFAULT_CITY_ID`
 
-On a physical device over USB, prefer `adb reverse` so the phone can reach `127.0.0.1` on the host:
+On a physical device on the same Wi‑Fi, point `EXPO_PUBLIC_API_URL` at your machine LAN IP (API listens on `0.0.0.0:3010`):
+
+```bash
+# You are already in apps/mobile if you followed the setup flow
+hostname -I | awk '{print $1}'   # e.g. 172.19.2.162
+
+export ANDROID_HOME=/data/dev/android/sdk/Sdk
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+
+pnpm run android:configure   # writes android/local.properties (sdk + ndk)
+pnpm run android             # build dev client once
+
+EXPO_PUBLIC_API_URL=http://172.19.2.162:3010 \
+EXPO_PUBLIC_DEFAULT_CITY_ID=01932f1a-0000-7000-8000-000000000001 \
+pnpm run dev:client
+```
+
+On USB, `adb reverse` still works with `127.0.0.1`:
 
 ```bash
 export ANDROID_HOME=/data/dev/android/sdk/Sdk

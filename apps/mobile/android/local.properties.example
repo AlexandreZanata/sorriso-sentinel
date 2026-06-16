@@ -1,0 +1,6 @@
+## Copy to local.properties (gitignored) or run:
+##   pnpm run android:configure
+##
+## Use the SDK root that contains platform-tools/ and ndk/.
+sdk.dir=/data/dev/android/sdk/Sdk
+ndk.dir=/data/dev/android/sdk/Sdk/ndk/27.1.12297006

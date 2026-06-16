@@ -1,39 +1,29 @@
-import { NativeModulesProxy } from 'expo-modules-core';
 import type {
   MwmDownloadProgress,
   MwmEngineInitOptions,
   MwmRegionDescriptor,
 } from './types';
+import {
+  downloadMwmRegion,
+  getMwmDownloadProgress,
+  initializeMwmEngine,
+  listInstalledMwmRegions,
+} from './engine/ts-mwm-engine';
 
-interface MwmEngineNativeModule {
-  initializeEngine(options: MwmEngineInitOptions): Promise<boolean>;
-  listInstalledRegions(): Promise<MwmRegionDescriptor[]>;
-  downloadRegion(regionId: string): Promise<boolean>;
-  getDownloadProgress(regionId: string): Promise<MwmDownloadProgress>;
-}
+export const MwmEngineModule = {
+  async initializeEngine(options: MwmEngineInitOptions): Promise<boolean> {
+    return initializeMwmEngine(options);
+  },
 
-const FALLBACK_PROGRESS: MwmDownloadProgress = {
-  regionId: '',
-  downloadedBytes: 0,
-  totalBytes: 0,
-  status: 'failed',
-};
+  async listInstalledRegions(): Promise<MwmRegionDescriptor[]> {
+    return listInstalledMwmRegions();
+  },
 
-const fallbackModule: MwmEngineNativeModule = {
-  async initializeEngine() {
-    return false;
+  async downloadRegion(regionId: string): Promise<boolean> {
+    return downloadMwmRegion(regionId);
   },
-  async listInstalledRegions() {
-    return [];
-  },
-  async downloadRegion() {
-    return false;
-  },
-  async getDownloadProgress(regionId: string) {
-    return { ...FALLBACK_PROGRESS, regionId };
+
+  async getDownloadProgress(regionId: string): Promise<MwmDownloadProgress> {
+    return getMwmDownloadProgress(regionId);
   },
 };
-
-export const MwmEngineModule: MwmEngineNativeModule =
-  (NativeModulesProxy.MwmEngineModule as MwmEngineNativeModule | undefined) ??
-  fallbackModule;

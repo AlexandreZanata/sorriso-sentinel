@@ -1,3 +1,4 @@
+import { StyleSheet, View } from 'react-native';
 import { I18N_KEYS } from '../../../i18n/keys';
 import { useTranslation } from '../../../i18n/i18n-provider';
 import { ScreenShell } from '../../../ui/templates/screen-shell';
@@ -20,11 +21,41 @@ export function MapScreen() {
   return (
     <ScreenShell
       header={<Text variant="subtitle">{t(I18N_KEYS.tabs.map)}</Text>}
-      contentStyle={{ padding: 0 }}
+      contentStyle={styles.content}
     >
-      {isLoading ? <Spinner /> : null}
-      {error ? <Text>{t(I18N_KEYS.map.loadError)}</Text> : null}
       <MapViewport pins={pins} />
+      {isLoading ? (
+        <View style={styles.loadingOverlay}>
+          <Spinner />
+        </View>
+      ) : null}
+      {error ? (
+        <View style={styles.errorBanner}>
+          <Text variant="caption">{t(I18N_KEYS.map.loadError)}</Text>
+        </View>
+      ) : null}
     </ScreenShell>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+    padding: 0,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+  },
+  errorBanner: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    right: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+  },
+});

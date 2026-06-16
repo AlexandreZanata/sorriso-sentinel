@@ -7,10 +7,10 @@ import {
 } from '../services/list-occurrences.service';
 
 const DEFAULT_BBOX = {
-  minLatitude: -22.97,
-  maxLatitude: -22.92,
-  minLongitude: -43.26,
-  maxLongitude: -43.21,
+  minLatitude: -12.58,
+  maxLatitude: -12.51,
+  minLongitude: -55.76,
+  maxLongitude: -55.68,
 };
 
 export function useMapOccurrences() {

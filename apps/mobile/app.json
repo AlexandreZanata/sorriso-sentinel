@@ -28,6 +28,9 @@
       ],
       "expo-localization",
       "expo-secure-store"
-    ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.anonymous.sorrisosentinel"
+    }
   }
 }

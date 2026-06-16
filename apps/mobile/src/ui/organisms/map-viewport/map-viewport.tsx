@@ -1,10 +1,14 @@
 import * as Localization from 'expo-localization';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { MwmEngineModule, MwmMapView, type MwmOccurrencePin } from '@sorriso-sentinel/mwm-engine';
+import {
+  DEFAULT_DATA_VERSION,
+  MwmEngineModule,
+  MwmMapView,
+  type MwmOccurrencePin,
+} from '@sorriso-sentinel/mwm-engine';
 import { getDefaultCityId } from '../../../api/config';
 import { Text } from '../../atoms/text';
-import { Button } from '../../atoms/button';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 
@@ -12,12 +16,16 @@ export interface MapViewportProps {
   pins: MwmOccurrencePin[];
 }
 
-const DEFAULT_REGION = 'brazil';
-const DATA_VERSION = 1;
+const DEFAULT_REGION = 'Brazil_Mato Grosso';
 
 export function MapViewport({ pins }: MapViewportProps) {
   const [downloadStatus, setDownloadStatus] = useState('queued');
   const [isReady, setIsReady] = useState(false);
+
+  const refreshDownloadStatus = useCallback(async () => {
+    const progress = await MwmEngineModule.getDownloadProgress(DEFAULT_REGION);
+    setDownloadStatus(progress.status);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -28,13 +36,32 @@ export function MapViewport({ pins }: MapViewportProps) {
         writablePath: `mwm/${getDefaultCityId()}`,
         cachePath: 'mwm/cache',
         locale,
-        dataVersion: DATA_VERSION,
-        metadataUrl: 'https://cdn.organicmaps.app/maps/omim-data',
+        dataVersion: DEFAULT_DATA_VERSION,
+        metadataUrl: 'https://cdn-us-1.comaps.app',
       });
 
-      if (active) {
-        setIsReady(ok);
+      if (!active) {
+        return;
       }
+
+      setIsReady(ok);
+
+      if (!ok) {
+        return;
+      }
+
+      const installed = await MwmEngineModule.listInstalledRegions();
+      const hasRegion = installed.some((region) => region.id === DEFAULT_REGION);
+
+      if (!hasRegion) {
+        void MwmEngineModule.downloadRegion(DEFAULT_REGION).then(() => {
+          if (active) {
+            void refreshDownloadStatus();
+          }
+        });
+      }
+
+      void refreshDownloadStatus();
     }
 
     void setup();
@@ -42,30 +69,21 @@ export function MapViewport({ pins }: MapViewportProps) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshDownloadStatus]);
 
-  const pinCountLabel = useMemo(() => `${pins.length} pins loaded`, [pins.length]);
-
-  async function handleDownloadBaseMap() {
-    await MwmEngineModule.downloadRegion(DEFAULT_REGION);
-    const progress = await MwmEngineModule.getDownloadProgress(DEFAULT_REGION);
-    setDownloadStatus(progress.status);
-  }
+  const showDownloadBanner =
+    isReady && downloadStatus !== 'finished' && downloadStatus !== 'failed';
 
   return (
     <View style={styles.container}>
       <MwmMapView style={styles.map} pins={pins} testID="mwm-map-view" />
-      <View style={styles.controls}>
-        <Text variant="caption">Engine ready: {isReady ? 'yes' : 'no'}</Text>
-        <Text variant="caption">Download status: {downloadStatus}</Text>
-        <Text variant="caption">{pinCountLabel}</Text>
-        <Button
-          label="Download base map package"
-          onPress={() => {
-            void handleDownloadBaseMap();
-          }}
-        />
-      </View>
+      {showDownloadBanner ? (
+        <View style={styles.banner}>
+          <Text variant="caption">
+            Downloading offline map ({downloadStatus})…
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -73,18 +91,20 @@ export function MapViewport({ pins }: MapViewportProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    borderRadius: 12,
     overflow: 'hidden',
   },
   map: {
     flex: 1,
-    minHeight: 280,
   },
-  controls: {
+  banner: {
+    position: 'absolute',
+    left: spacing.sm,
+    right: spacing.sm,
+    bottom: spacing.sm,
     padding: spacing.sm,
-    gap: spacing.xs,
+    borderRadius: 8,
     backgroundColor: colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
 });
