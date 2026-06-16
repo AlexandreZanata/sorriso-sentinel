@@ -2,7 +2,7 @@
 
 React Native + Expo SDK 54 client (`apps/mobile`). These docs define **structure, i18n, UI composition, and API integration** before feature implementation.
 
-**Status:** draft — app is scaffold-only; docs describe the target architecture.
+**Status:** in implementation — foundation (i18n, theme, bootstrap, tabs) landed; map and occurrence flows next.
 
 ## Document set
 

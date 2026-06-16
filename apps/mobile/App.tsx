@@ -1,20 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { AppProviders } from './src/providers/app-providers';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Sorriso Sentinel</Text>
-      <Text>Collective city memory</Text>
+    <>
+      <AppProviders />
       <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
