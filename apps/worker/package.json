@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@sorriso-sentinel/domain": "workspace:*",
-    "bullmq": "^5.53.0",
+    "bullmq": "^5.79.1",
     "ioredis": "^5.6.1"
   },
   "devDependencies": {
