@@ -319,8 +319,8 @@ importers:
         specifier: ~19.1.10
         version: 19.1.17
       expo-modules-core:
-        specifier: ^3.0.30
-        version: 3.0.30(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7))(react@19.2.7)
+        specifier: ^56.0.17
+        version: 56.0.17(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7))(react@19.2.7)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -1735,6 +1735,9 @@ packages:
 
   '@expo/env@2.0.11':
     resolution: {integrity: sha512-xV+ps6YCW7XIPVUwFVCRN2nox09dnRwy8uIjwHWTODu0zFw4kp4omnVkl0OOjuu2XOe7tdgAHxikrkJt9xB/7Q==}
+
+  '@expo/expo-modules-macros-plugin@0.2.2':
+    resolution: {integrity: sha512-4IMzPDIo/VOXREQjsJtliSfqYVZvfzU2SLFS/9sKMWF848S8CHx+e/E+Vf0TcMvpWCCKX5umyqxb13KJJ+YUzg==}
 
   '@expo/fingerprint@0.15.5':
     resolution: {integrity: sha512-mdVoAMcux1WlM6kd1RoWiHRNqKqS+J6mKmWQ/BKgeh937S/fcW58EE68O6nc4KDXtWi3PBeNHskOFcgyIuD4hw==}
@@ -4041,6 +4044,21 @@ packages:
     resolution: {integrity: sha512-a6IrpAn/Jbmwxi9L+hMmXKpNqnkUpoF7WHOpn02rVLyax2J0gB1vvCVE5rNydplEnt41Q6WxQwvcOjZaIkcSUg==}
     peerDependencies:
       react: 19.2.7
+      react-native: '*'
+
+  expo-modules-core@56.0.17:
+    resolution: {integrity: sha512-5J8whnT7Ccp+BrFClLmpF76omBqn95VZExroTm01Dgjm4vpty1Rb7U3we+ZUceNHtRd07Lw30u7FNfDgIhEbRQ==}
+    peerDependencies:
+      react: 19.2.7
+      react-native: '*'
+      react-native-worklets: ^0.7.4 || ^0.8.0
+    peerDependenciesMeta:
+      react-native-worklets:
+        optional: true
+
+  expo-modules-jsi@56.0.10:
+    resolution: {integrity: sha512-fHZcFpYO/o62GYa6fJyAQJZcAShzhoN0iMMDzbr7vD3ewET6e1vAlTonbEakN9F0VHEgBFJ4NREy87uwVcpCuA==}
+    peerDependencies:
       react-native: '*'
 
   expo-secure-store@15.0.8:
@@ -8056,6 +8074,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@expo/expo-modules-macros-plugin@0.2.2': {}
+
   '@expo/fingerprint@0.15.5':
     dependencies:
       '@expo/spawn-async': 1.8.0
@@ -10611,6 +10631,18 @@ snapshots:
     dependencies:
       invariant: 2.2.4
       react: 19.2.7
+      react-native: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7)
+
+  expo-modules-core@56.0.17(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7))(react@19.2.7):
+    dependencies:
+      '@expo/expo-modules-macros-plugin': 0.2.2
+      expo-modules-jsi: 56.0.10(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7))
+      invariant: 2.2.4
+      react: 19.2.7
+      react-native: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7)
+
+  expo-modules-jsi@56.0.10(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7)):
+    dependencies:
       react-native: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.2.7)
 
   expo-secure-store@15.0.8(expo@54.0.35(@babel/core@7.29.7)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)):
